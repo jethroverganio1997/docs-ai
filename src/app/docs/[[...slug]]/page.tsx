@@ -9,7 +9,7 @@ import {
 import { notFound } from 'next/navigation';
 import { MDXContent } from '@content-collections/mdx/react';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
-import { getMDXComponents } from '@/mdx-components';
+import { getMDXComponents } from '@/components/mdx-components';
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;

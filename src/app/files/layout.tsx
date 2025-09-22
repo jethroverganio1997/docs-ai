@@ -1,7 +1,7 @@
 import { HomeLayout } from "fumadocs-ui/layouts/home";
 import { baseOptions, linkItems } from "@/lib/layout.shared";
-
-export default function Layout({ children }: LayoutProps<"/">) {
+import type { ReactNode } from "react";
+export default function FilesLayout({ children }: { children: ReactNode }) {
   return (
     <HomeLayout {...baseOptions()} links={[...linkItems]}>
       {children}
