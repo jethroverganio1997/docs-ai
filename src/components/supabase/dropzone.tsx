@@ -4,14 +4,14 @@ import { cn } from "@/lib/utils";
 import { type UseSupabaseUploadReturn } from "@/hooks/use-supabase-upload";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, File, Loader2, Upload, X } from "lucide-react";
-import React, {
+import {
+  createContext,
   type PropsWithChildren,
   useCallback,
   useContext,
   useEffect,
 } from "react";
 
-// Helper function to format bytes into a human-readable string
 export const formatBytes = (
   bytes: number,
   decimals = 2,
@@ -30,24 +30,17 @@ export const formatBytes = (
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
-// FIX: Define the context type to include an optional `reset` function.
-// The Dropzone now officially supports a reset mechanism.
 type DropzoneContextType = Omit<
   UseSupabaseUploadReturn,
   "getRootProps" | "getInputProps"
-> & {
-  reset?: () => void;
-};
+>;
 
-const DropzoneContext = React.createContext<DropzoneContextType | undefined>(
+const DropzoneContext = createContext<DropzoneContextType | undefined>(
   undefined
 );
 
-// The props for the main component now accept everything from your hook,
-// which should include the new `reset` function.
 type DropzoneProps = UseSupabaseUploadReturn & {
   className?: string;
-  reset?: () => void;
 };
 
 const Dropzone = ({
@@ -59,14 +52,18 @@ const Dropzone = ({
 }: PropsWithChildren<DropzoneProps>) => {
   const isSuccess = restProps.isSuccess;
   const isActive = restProps.isDragActive;
-
+  // FIX: The red 'destructive' color should only appear for actual file errors,
+  // not when hovering with a potentially invalid file. We remove the `isDragReject` check.
+  // During an active drag, the `isActive` condition will now correctly apply the blue 'primary' color.
   const isInvalid =
     (restProps.errors.length > 0 && !restProps.isSuccess) ||
     restProps.files.some((file) => file.errors.length !== 0);
 
-  // `restProps` will correctly pass down the `reset` function to the context provider.
   return (
     <DropzoneContext.Provider value={{ ...restProps }}>
+      {/* FIX: Add the `onClick` handler to make the entire component clickable.
+        This uses the `open` function from the `useDropzone` hook.
+      */}
       <div
         {...getRootProps({
           className: cn(
@@ -75,10 +72,13 @@ const Dropzone = ({
             isSuccess
               ? "border-solid border-primary"
               : "border-dashed border-gray-300",
+            // When dragging a file over, this class will apply a blue color scheme
             isActive && !isInvalid && "border-primary bg-primary/10",
+            // This will only apply a red color scheme if there are actual file errors
             isInvalid && "border-destructive bg-destructive/10"
           ),
         })}
+        // By passing the open function to the div's onClick, the entire area becomes clickable.
         onClick={restProps.open}
       >
         <input {...getInputProps()} />
@@ -87,7 +87,6 @@ const Dropzone = ({
     </DropzoneContext.Provider>
   );
 };
-
 const DropzoneContent = ({ className }: { className?: string }) => {
   const {
     files,
@@ -99,23 +98,24 @@ const DropzoneContent = ({ className }: { className?: string }) => {
     maxFileSize,
     maxFiles,
     isSuccess,
-    // FIX: Safely retrieve `reset` from the context. It may be undefined.
-    reset,
   } = useDropzoneContext();
 
   const exceedMaxFiles = files.length > maxFiles;
 
   const handleRemoveFile = useCallback(
     (e: React.MouseEvent, fileName: string) => {
+      // FIX: Stop click event from propagating to the parent div, which would open the file dialog.
       e.stopPropagation();
       setFiles(files.filter((file) => file.name !== fileName));
     },
     [files, setFiles]
   );
 
+  // Clean up object URLs to prevent memory leaks
   useEffect(() => {
     return () =>
       files.forEach((file) => {
+        // FIX: Check if file.preview exists before revoking to prevent errors.
         if (file.preview) {
           URL.revokeObjectURL(file.preview);
         }
@@ -123,47 +123,19 @@ const DropzoneContent = ({ className }: { className?: string }) => {
   }, [files]);
 
   if (isSuccess) {
-    const handleUploadMore = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      // FIX: Check if the reset function exists. If not, provide a helpful warning
-      // for the developer in the console.
-      if (reset) {
-        reset();
-      } else {
-        console.warn(
-          'Dropzone: "Upload More Files" was clicked, but no `reset` function was provided. Please pass a `reset` function from your upload hook to the <Dropzone> component to enable this feature.'
-        );
-      }
-    };
-
     return (
       <div
         className={cn(
-          "flex flex-col items-center justify-center gap-y-2",
+          "flex flex-row items-center gap-x-2 justify-center",
           className
         )}
       >
-        <div className="flex items-center gap-x-2">
-          <CheckCircle size={16} className="text-primary" />
-          <p className="text-primary text-sm">
-            Successfully uploaded {files.length} file
-            {files.length > 1 ? "s" : ""}
-          </p>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="mt-2"
-          onClick={handleUploadMore}
-        >
-          Upload More Files
-        </Button>
+        <CheckCircle size={16} className="text-primary" />
+        <p className="text-primary text-sm">
+          Successfully uploaded {files.length} file{files.length > 1 ? "s" : ""}
+        </p>
       </div>
     );
-  }
-
-  if (files.length === 0) {
-    return null;
   }
 
   return (
@@ -177,12 +149,14 @@ const DropzoneContent = ({ className }: { className?: string }) => {
             key={`${file.name}-${idx}`}
             className="flex items-center gap-x-4 border-b py-2 first:mt-4 last:mb-4 "
           >
+            {/* FIX: Conditionally render image only if file.preview exists to satisfy TypeScript. */}
             {file.type.startsWith("image/") && file.preview ? (
               <div className="h-10 w-10 rounded border overflow-hidden shrink-0 bg-muted flex items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={file.preview}
                   alt={file.name}
-                  className="object-cover h-full w-full"
+                  className="object-cover"
                 />
               </div>
             ) : (
@@ -232,7 +206,7 @@ const DropzoneContent = ({ className }: { className?: string }) => {
                 size="icon"
                 variant="link"
                 className="shrink-0 justify-self-end text-muted-foreground hover:text-foreground"
-                onClick={(e) => handleRemoveFile(e, file.name)}
+                onClick={(e) => handleRemoveFile(e,file.name)}
               >
                 <X />
               </Button>
@@ -252,6 +226,7 @@ const DropzoneContent = ({ className }: { className?: string }) => {
           <Button
             variant="outline"
             onClick={(e) => {
+              // FIX: Stop click event from propagating, which would open the file dialog.
               e.stopPropagation();
               onUpload();
             }}
@@ -273,8 +248,7 @@ const DropzoneContent = ({ className }: { className?: string }) => {
 };
 
 const DropzoneEmptyState = ({ className }: { className?: string }) => {
-  const { maxFiles, maxFileSize, isSuccess, files, open } =
-    useDropzoneContext();
+  const { maxFiles, maxFileSize, inputRef, isSuccess } = useDropzoneContext();
 
   if (isSuccess) {
     return null;
@@ -290,16 +264,12 @@ const DropzoneEmptyState = ({ className }: { className?: string }) => {
       <div className="flex flex-col items-center gap-y-1">
         <p className="text-xs text-muted-foreground">
           Drag and drop or{" "}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              open();
-            }}
-            className="underline cursor-pointer transition hover:text-foreground bg-transparent border-none p-0 font-medium"
+          <a
+            onClick={() => inputRef.current?.click()}
+            className="underline cursor-pointer transition hover:text-foreground"
           >
             select {maxFiles === 1 ? `file` : "files"}
-          </button>{" "}
+          </a>{" "}
           to upload
         </p>
         {maxFileSize !== Number.POSITIVE_INFINITY && (
