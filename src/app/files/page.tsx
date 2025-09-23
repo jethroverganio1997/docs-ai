@@ -11,7 +11,7 @@ export default async function FilePage() {
   if (error) {
     return (
       <main className="container max-w-4xl w-full p-4">
-        <p className="text-red-500">Failed to fetch files: {error.message}</p>
+        <p className="text-destructive">Failed to fetch files: {error.message}</p>
       </main>
     );
   }
@@ -21,7 +21,7 @@ export default async function FilePage() {
       <FileUpload />
 
       {documents && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4 mt-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
           {documents.map((document) => (
             <FileCard key={document.id} document={document} />
           ))}

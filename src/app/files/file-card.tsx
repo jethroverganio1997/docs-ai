@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { File } from "lucide-react";
+import { Download, File, Loader2, Trash } from "lucide-react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -53,8 +53,9 @@ export default function FileCard({ document }: { document: Document }) {
             {document.name.split(".")[0]}
           </div>
           {loading && (
-            <div className="absolute inset-0 bg-white/70 flex items-center justify-center text-sm">
-              {loading === "download" ? "Downloading..." : "Deleting..."}
+            <div className="absolute inset-0 bg-muted flex flex-col items-center justify-center text-sm">
+              {loading === "download" ? <Download /> : <Trash />}
+              <Loader2 className="h-4 w-4 animate-spin mt-2" />
             </div>
           )}
         </div>

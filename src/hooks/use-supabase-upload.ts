@@ -190,7 +190,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
 
     // ✅ Trigger revalidation only when at least one upload succeeded
     if (responseSuccesses.length > 0) {
-      // await revalidateFilesPage(); TODO
+      await revalidateFilesPage(); 
 
       // ✅ Reset state back to "empty"
       setFiles([]);
