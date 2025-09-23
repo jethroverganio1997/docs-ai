@@ -16,10 +16,13 @@
     "@content-collections/next": "^0.2.7",
     "@fumadocs/content-collections": "1.2.2",
     "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-slot": "^1.2.3",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.57.4",
     "ai": "^5.0.48",
     "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "fumadocs-core": "15.7.13",
     "fumadocs-ui": "15.7.13",
     "hast-util-to-jsx-runtime": "^2.3.6",
@@ -31,6 +34,7 @@
     "remark-gfm": "^4.0.1",
     "remark-rehype": "^11.1.2",
     "tailwind-merge": "^3.3.1",
+    "tailwindcss-animate": "^1.0.7",
     "zod": "^4.1.11"
   },
   "devDependencies": {
