@@ -29,10 +29,15 @@ $$;
 
 create policy "Authenticated users can upload files"
 on storage.objects for insert to authenticated with check (
-  bucket_id = 'files' and
-    owner = auth.uid() and
-    private.uuid_or_null(path_tokens[2]) is not null
+  bucket_id = 'files' and owner = auth.uid() 
 );
+
+-- create policy "Authenticated users can upload files"
+-- on storage.objects for insert to authenticated with check (
+--   bucket_id = 'files' and
+--     owner = auth.uid() and
+--     private.uuid_or_null(path_tokens[2]) is not null
+-- );
 
 create policy "Users can view their own files"
 on storage.objects for select to authenticated using (

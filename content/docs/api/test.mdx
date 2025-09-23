@@ -1,8 +1,8 @@
-
 ---
 title: FEE Remit Architecture
-description: In a **`Vertical slice architecture`** for Flutter, the idea is to organize your code by features rather than by layers (like separating data, domain, and presentation). 
+description: In a Vertical slice architecture for Flutter, the idea is to organize your code by features rather than by layers (like separating data, domain, and presentation). 
 ---
+
 
 ## 1. Folder Structure
  Each feature has its own data, domain, and presentation layers, making the feature self-contained.
@@ -11,11 +11,11 @@ lib/
 ├── features/
 │   ├── authentication/
 │   │   ├── data/
-│   │   │   ├── models/
+│   │   │   ├── dto/
 │   │   │   ├── repositories/
-│   │   │   └── data_sources/
+│   │   │   └── data/
 │   │   ├── domain/
-│   │   │   ├── entities/
+│   │   │   ├── models/
 │   │   │   ├── use_cases/
 │   │   │   └── repositories/
 │   │   └── presentation/
@@ -33,6 +33,7 @@ lib/
 │   ├── themes/
 │   └── ...
 ```
+
 
 ## 2. Feature Slice
 Each feature slice contains:
