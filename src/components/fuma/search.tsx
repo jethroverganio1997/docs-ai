@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import { Loader2, RefreshCw, Send, X } from "lucide-react";
-import { buttonVariants } from "./ui/fd-button";
+import { buttonVariants } from "../ui/fd-button";
 import Link from "fumadocs-core/link";
 import {
   Dialog,
@@ -22,11 +22,11 @@ import {
   DialogTitle,
 } from "@radix-ui/react-dialog";
 import { type UIMessage, useChat, type UseChatHelpers } from "@ai-sdk/react";
-import type { ProvideLinksToolSchema } from "../lib/inkeep-qa-schema";
+import type { ProvideLinksToolSchema } from "../../lib/inkeep-qa-schema";
 import type { z } from "zod";
 import { DefaultChatTransport } from "ai";
 import { Markdown } from "./markdown";
-import { cn } from "../lib/utils";
+import { cn } from "../../lib/utils";
 
 const ChatContext = createContext<UseChatHelpers<UIMessage> | null>(null);
 function useChatContext() {

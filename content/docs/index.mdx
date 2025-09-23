@@ -1,13 +1,45 @@
 ---
-title: Introduction
-description: Your first document
+title: "Introduction"
+description: "Learn the correct structure and format when creating MDX files for FEE Remit documentation."
+date: 2025-09-23
+tags:
+  - fumadocs
+  - mdx
+  - guide
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
+# 📄 MDX File Format
 
-## What is Next?
+When creating documentation pages, each `.mdx` file should follow a clear structure that combines **frontmatter metadata** with **Markdown/MDX content**.
 
-<Cards>
-  <Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.vercel.app" />
-</Cards>
+---
+
+## 1. Frontmatter
+
+At the top of every file, include YAML frontmatter to describe the page.  
+This helps organize docs, generate navigation, and apply metadata.
+
+```mdx
+---
+title: "Getting Started"
+description: "Learn how to set up and use Fumadocs for your project."
+date: 2025-09-23
+tags:
+  - docs
+  - tutorial
+---
+```
+
+## 2. File Naming and Format
+
+- Every documentation file **must end with `.mdx`**.  
+  Example: `sample.mdx`, `getting-started.mdx`
+
+- The content inside an MDX file **follows standard Markdown syntax**, which means you can use:
+
+  - Headings (`#`, `##`, `###`)
+  - Lists (`-` or `1.`)
+  - Links (`[text](url)`)
+  - Images (`![alt](url)`)
+  - Additionally, you can include React components directly in your Markdown, making MDX powerful for interactive documentation.
+

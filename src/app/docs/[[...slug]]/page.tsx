@@ -9,7 +9,7 @@ import {
 import { notFound } from "next/navigation";
 import { MDXContent } from "@content-collections/mdx/react";
 import { createRelativeLink } from "fumadocs-ui/mdx";
-import { getMDXComponents } from "@/components/mdx-components";
+import { getMDXComponents } from "@/components/fuma/mdx-components";
 
 export function generateStaticParams() {
   return source.generateParams();

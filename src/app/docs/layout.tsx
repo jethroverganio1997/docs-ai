@@ -3,7 +3,7 @@ import { LargeSearchToggle } from "fumadocs-ui/components/layout/search-toggle";
 // import { AISearchTrigger } from '@/components/ai';
 import { baseOptions, linkItems, logo } from "@/lib/layout.shared";
 import { source } from "@/lib/source";
-import { AISearchTrigger } from "../../components";
+import { AISearchTrigger } from "../../components/fuma";
 import { cn } from "fumadocs-ui/utils/cn";
 import { buttonVariants } from "fumadocs-ui/components/ui/button";
 import { Sparkles } from "lucide-react";
