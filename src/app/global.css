@@ -1,7 +1,36 @@
 @import "tailwindcss";
-@import "fumadocs-ui/css/solar.css";
+@import "fumadocs-ui/css/black.css";
 @import "fumadocs-ui/css/preset.css";
 
 :root {
   --fd-layout-width: 1480px;
+}
+
+
+
+@layer utilities {
+  .gradient-primary {
+    background: linear-gradient(135deg, oklch(0.45 0.15 280) 0%, oklch(0.6 0.2 340) 100%);
+  }
+  .gradient-secondary {
+    background: linear-gradient(135deg, oklch(0.08 0.02 280) 0%, oklch(0.12 0.03 320) 100%);
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, oklch(0.45 0.15 280) 0%, oklch(0.6 0.2 340) 50%, oklch(0.7 0.25 20) 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift 4s ease-in-out infinite;
+  }
+
+  @keyframes gradient-shift {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
 }

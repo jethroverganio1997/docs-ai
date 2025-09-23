@@ -16,6 +16,8 @@
     "@content-collections/next": "^0.2.7",
     "@fumadocs/content-collections": "1.2.2",
     "@radix-ui/react-dialog": "^1.1.15",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.57.4",
     "ai": "^5.0.48",
     "class-variance-authority": "^0.7.1",
     "fumadocs-core": "15.7.13",
