@@ -17,7 +17,7 @@ const FileUpload = () => {
   });
 
   return (
-    <div className="w-[500px]">
+    <div className="w-full py-4">
       <Dropzone {...props}>
         <DropzoneEmptyState />
         <DropzoneContent />
