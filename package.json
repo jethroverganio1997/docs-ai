@@ -15,6 +15,7 @@
     "@content-collections/mdx": "^0.2.2",
     "@content-collections/next": "^0.2.7",
     "@fumadocs/content-collections": "1.2.2",
+    "@fumadocs/mdx-remote": "^1.4.0",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-context-menu": "^2.2.16",
     "@radix-ui/react-dialog": "^1.1.15",

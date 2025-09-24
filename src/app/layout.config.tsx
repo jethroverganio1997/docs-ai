@@ -2,8 +2,8 @@ import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
 
 import { type LinkItemType } from "fumadocs-ui/layouts/docs";
 import { BookIcon, File } from "lucide-react";
-import { CurrentUserAvatar } from "../supabase/current-user-avatar";
-import { LogoutButton } from "../auth/logout-button";
+import { CurrentUserAvatar } from "../components/supabase/current-user-avatar";
+import { LogoutButton } from "../components/auth/logout-button";
 
 /**
  * Shared layout configurations

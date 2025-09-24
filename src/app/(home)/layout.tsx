@@ -1,5 +1,5 @@
 import { HomeLayout } from "fumadocs-ui/layouts/home";
-import { baseOptions, linkItems } from "@/components/fuma/layout-shared";
+import { baseOptions, linkItems } from "@/app/layout.config";
 
 export default function Layout({ children }: LayoutProps<"/">) {
   const base = baseOptions();

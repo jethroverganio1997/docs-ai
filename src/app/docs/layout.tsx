@@ -1,7 +1,7 @@
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { LargeSearchToggle } from "fumadocs-ui/components/layout/search-toggle";
 // import { AISearchTrigger } from '@/components/ai';
-import { baseOptions, linkItems, logo } from "@/components/fuma/layout-shared";
+import { baseOptions, linkItems, logo } from "@/app/layout.config";
 import { source } from "@/lib/source";
 import { AISearchTrigger } from "../../components/fuma";
 import { cn } from "fumadocs-ui/utils/cn";
