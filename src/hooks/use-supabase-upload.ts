@@ -5,7 +5,7 @@ import {
   type FileRejection,
   useDropzone,
 } from "react-dropzone";
-import { revalidateFilesPage } from "../app/files/actions";
+import { revalidateFromClient } from "../app/files/actions";
 
 const supabase = createClient();
 
@@ -202,7 +202,8 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
 
     // ✅ Trigger revalidation only when at least one upload succeeded
     if (responseSuccesses.length > 0) {
-      await revalidateFilesPage();
+      await revalidateFromClient("/files");
+      await revalidateFromClient("/docs");
 
       // ✅ Reset state back to "empty"
       setFiles([]);

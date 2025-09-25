@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "../../lib/supabase/server";
 
-export async function revalidateFilesPage() {
-  revalidatePath("/files");
+export async function revalidateFromClient(path: string) {
+  revalidatePath(path);
 }
 
 export async function downloadFile(path: string | null) {
@@ -26,6 +26,7 @@ export async function deleteFile(path: string | null) {
   const { error } = await supabase.storage.from("files").remove([path]);
   if (error) throw error;
 
-  await revalidateFilesPage();
+  revalidatePath("/files");
+  revalidatePath("/docs");
   return true;
 }
