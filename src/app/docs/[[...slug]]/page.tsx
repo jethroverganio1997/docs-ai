@@ -1,51 +1,60 @@
-import { source } from "@/lib/source";
-import type { Metadata } from "next";
-import {
-  DocsBody,
-  DocsDescription,
-  DocsPage,
-  DocsTitle,
-} from "fumadocs-ui/page";
-import { notFound } from "next/navigation";
-import { MDXContent } from "@content-collections/mdx/react";
-import { createRelativeLink } from "fumadocs-ui/mdx";
-import { getMDXComponents } from "@/components/fuma/mdx-components";
+// // import { source } from "@/lib/source";
+// import type { Metadata } from "next";
+// import {
+//   DocsBody,
+//   DocsDescription,
+//   DocsPage,
+//   DocsTitle,
+// } from "fumadocs-ui/page";
+// import { notFound } from "next/navigation";
+// import { compileMDX, parseFrontmatter } from "@fumadocs/mdx-remote";
+// import { Frontmatter, getPage, getPages } from "../../../lib/remote-source";
+// import { getMDXComponents } from "@/components/fuma/mdx-components";
 
-export function generateStaticParams() {
-  return source.generateParams();
+// export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
+//   const params = await props.params;
+//   const page = await getPage(params.slug);
+//   if (!page) notFound();
+
+//   const compiled = await compileMDX<Frontmatter>({
+//     filePath: page.filePath,
+//     source: page.content,
+//   });
+//   const MdxContent = compiled.body;
+
+//   return (
+//     <DocsPage toc={compiled.toc}>
+//       <DocsTitle>{compiled.frontmatter.title}</DocsTitle>
+//       <DocsDescription>{compiled.frontmatter.description}</DocsDescription>
+//       <DocsBody>
+//         <MdxContent components={getMDXComponents()} />
+//       </DocsBody>
+//     </DocsPage>
+//   );
+// }
+
+// export async function generateStaticParams() {
+//   return (await getPages()).map((page) => ({ slug: page.slug }));
+// }
+
+// export async function generateMetadata(props: {
+//   params: Promise<{ slug?: string[] }>;
+// }) {
+//   const params = await props.params;
+//   const page = await getPage(params.slug);
+//   if (!page) notFound();
+
+//   const { frontmatter } = parseFrontmatter(page.content);
+
+//   return {
+//     title: frontmatter.title,
+//     description: frontmatter.description,
+//   } satisfies Metadata;
+// }
+import React from "react";
+
+function page() {
+  return <div>page</div>;
 }
 
-export async function generateMetadata(
-  props: PageProps<"/docs/[[...slug]]">
-): Promise<Metadata> {
-  const params = await props.params;
-  const page = source.getPage(params.slug);
-  if (!page) notFound();
-
-  return {
-    title: page.data.title,
-    description: page.data.description,
-  };
-}
-
-export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
-  const params = await props.params;
-  const page = source.getPage(params.slug);
-  if (!page) notFound();
-
-  return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
-      <DocsTitle>{page.data.title}</DocsTitle>
-      <DocsDescription>{page.data.description}</DocsDescription>
-      <DocsBody>
-        <MDXContent
-          code={page.data.body}
-          components={getMDXComponents({
-            // this allows you to link to other pages with relative file paths
-            a: createRelativeLink(source, page),
-          })}
-        />
-      </DocsBody>
-    </DocsPage>
-  );
-}
+export default page;

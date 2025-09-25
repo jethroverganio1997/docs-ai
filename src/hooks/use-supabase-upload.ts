@@ -88,24 +88,24 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
       const validFiles = acceptedFiles
         .filter((file) => !files.find((x) => x.name === file.name))
         .map((file) => {
-          const [firstWord] = file.name.split(".");
+          // const [firstWord] = file.name.split(".");
 
-          // ✅ Validate first word
-          if (
-            !["mobile", "backend", "frontend", "api", "server"].includes(
-              firstWord,
-            )
-          ) {
-            (file as FileWithPreview).preview = URL.createObjectURL(file);
-            (file as FileWithPreview).errors = [
-              {
-                code: "invalid-prefix",
-                message:
-                  "Filename must start with mobile, backend, frontend, api or server",
-              },
-            ];
-            return file as FileWithPreview;
-          }
+          // // ✅ Validate first word
+          // if (
+          //   !["mobile", "backend", "frontend", "api", "server"].includes(
+          //     firstWord,
+          //   )
+          // ) {
+          //   (file as FileWithPreview).preview = URL.createObjectURL(file);
+          //   (file as FileWithPreview).errors = [
+          //     {
+          //       code: "invalid-prefix",
+          //       message:
+          //         "Filename must start with mobile, backend, frontend, api or server",
+          //     },
+          //   ];
+          //   return file as FileWithPreview;
+          // }
 
           (file as FileWithPreview).preview = URL.createObjectURL(file);
           (file as FileWithPreview).errors = [];
@@ -137,14 +137,26 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
     multiple: maxFiles !== 1,
   });
 
-  const buildFilePath = (file: File) => {
-    const parts = file.name.split(".");
-    if (parts.length < 2) return !!path ? `${path}/${file.name}` : file.name;
+  const buildFilePath = (file: File, path?: string): string => {
+    const filename = file.name;
+    const lastDotIndex = filename.lastIndexOf(".");
 
-    const folder = parts[0]; // first word before first dot
-    const finalName = parts.slice(1).join("."); // rest of the filename
+    // Handles files with no extension (e.g., "README") or hidden files (e.g., ".env")
+    if (lastDotIndex <= 0) {
+      return path ? `${path}/${filename}` : filename;
+    }
 
-    return !!path ? `${path}/${folder}/${finalName}` : `${folder}/${finalName}`;
+    // Separate the base name from the extension
+    const baseName = filename.substring(0, lastDotIndex);
+    const extension = filename.substring(lastDotIndex); // e.g., ".mdx"
+
+    // Replace all remaining dots in the base name with slashes
+    const folderPath = baseName.replace(/\./g, "/");
+
+    const finalFilePath = folderPath + extension;
+
+    // Prepend the optional base path
+    return path ? `${path}/${finalFilePath}` : finalFilePath;
   };
 
   const onUpload = useCallback(async () => {
@@ -190,7 +202,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
 
     // ✅ Trigger revalidation only when at least one upload succeeded
     if (responseSuccesses.length > 0) {
-      await revalidateFilesPage(); 
+      await revalidateFilesPage();
 
       // ✅ Reset state back to "empty"
       setFiles([]);

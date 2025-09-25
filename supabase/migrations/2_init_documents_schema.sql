@@ -106,7 +106,7 @@ declare
   result int;
 begin
   insert into documents (name, storage_object_id, created_by)
-    values (new.path_tokens[3], new.id, new.owner)
+    values (new.name, new.id, new.owner)
     returning id into document_id;
 
   -- select

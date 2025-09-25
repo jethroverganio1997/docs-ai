@@ -1,18 +1,24 @@
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { LargeSearchToggle } from "fumadocs-ui/components/layout/search-toggle";
-// import { AISearchTrigger } from '@/components/ai';
 import { baseOptions, linkItems, logo } from "@/app/layout.config";
-import { source } from "@/lib/source";
 import { AISearchTrigger } from "../../components/fuma";
 import { cn } from "fumadocs-ui/utils/cn";
 import { buttonVariants } from "fumadocs-ui/components/ui/button";
 import { Sparkles } from "lucide-react";
+import { cache } from "react";
+import { getPageTree } from "../../lib/remote-source";
 
-export default function Layout({ children }: LayoutProps<"/docs">) {
+// const getCachedPageTree = cache(async () => {
+//   return await getPageTree();
+// });
+
+export default async function Layout({ children }: LayoutProps<"/docs">) {
+  const pageTree = await getPageTree();
   const base = baseOptions();
+
   return (
     <DocsLayout
-      tree={source.pageTree}
+      tree={pageTree}
       {...base}
       links={linkItems.filter((item) => item.type === "icon")}
       searchToggle={{

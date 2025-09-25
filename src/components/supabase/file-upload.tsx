@@ -10,7 +10,7 @@ import { useSupabaseUpload } from "@/hooks/use-supabase-upload";
 const FileUpload = () => {
   const props = useSupabaseUpload({
     bucketName: "files",
-    path: "mdx",
+    path: "",
     allowedMimeTypes: ["text/mdx"],
     maxFiles: 1,
     maxFileSize: 1000 * 1000 * 10, // 10MB,
