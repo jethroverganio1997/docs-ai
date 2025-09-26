@@ -9,10 +9,7 @@ import { cache } from "react";
 import { getPageTree } from "../../lib/remote-source";
 
 const getCachedPageTree = cache(async () => {
-  return {
-    tree: await getPageTree(),
-    cachedAt: new Date().toISOString(),
-  };
+  return await getPageTree();
 });
 
 export default async function Layout({ children }: LayoutProps<"/docs">) {
@@ -21,14 +18,13 @@ export default async function Layout({ children }: LayoutProps<"/docs">) {
 
   return (
     <DocsLayout
-      tree={pageTree.tree}
+      tree={pageTree}
       {...base}
       links={linkItems.filter((item) => item.type === "icon")}
       searchToggle={{
         components: {
           lg: (
             <div className="flex gap-1.5 max-md:hidden">
-              <p>{JSON.stringify(pageTree.cachedAt)}</p>
               <LargeSearchToggle className="flex-1" />
               <AISearchTrigger
                 aria-label="Ask AI"

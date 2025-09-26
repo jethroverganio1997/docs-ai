@@ -1,7 +1,7 @@
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
 
 import { type LinkItemType } from "fumadocs-ui/layouts/docs";
-import { BookIcon, File } from "lucide-react";
+import { BookIcon, File, Image } from "lucide-react";
 import { CurrentUserAvatar } from "../components/supabase/current-user-avatar";
 import { LogoutButton } from "../components/auth/logout-button";
 
@@ -41,6 +41,14 @@ export const linkItems: LinkItemType[] = [
     icon: <File />,
     text: "Files",
     url: "/files",
+    active: "nested-url",
+    // secondary items will be displayed differently on navbar
+    secondary: false,
+  },
+   {
+    icon: <Image />,
+    text: "Media",
+    url: "/media",
     active: "nested-url",
     // secondary items will be displayed differently on navbar
     secondary: false,

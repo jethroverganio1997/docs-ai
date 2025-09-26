@@ -2,6 +2,7 @@ import matter from "gray-matter";
 import { PageTree } from "fumadocs-core/server";
 import { createClient } from "./supabase/server";
 import { notFound } from "next/navigation";
+import { StorageObject } from "../types/document-view";
 
 // Name of your Supabase Storage bucket
 const BUCKET_NAME = "files";
@@ -11,15 +12,9 @@ export interface Frontmatter {
     description?: string;
 }
 
-interface Document {
-    id: number;
-    name: string;
-    storage_object_path: string | null;
-}
-
 // This is a helper function to get all file paths from your database view.
 // You need a view or table that lists the paths of objects in your bucket.
-async function listAllFilePaths(): Promise<Document[]> {
+async function listAllFilePaths(): Promise<StorageObject[]> {
     const supabase = await createClient();
     // Replace 'documents_with_storage_path' with the name of your view/table
     // and 'storage_object_path' with the column name containing the file path.
@@ -33,7 +28,7 @@ async function listAllFilePaths(): Promise<Document[]> {
     }
 
     // Filter out any null paths and return the list of strings
-    return data as Document[];
+    return data as StorageObject[];
 }
 
 /**

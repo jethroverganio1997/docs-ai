@@ -1,15 +1,15 @@
-import { createClient } from "@/lib/supabase/client";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   type FileError,
   type FileRejection,
   useDropzone,
 } from "react-dropzone";
-import { revalidateFromClient } from "../app/files/actions";
+import { revalidateFromClient } from "../actions/files-actions";
+import { createClient } from "../lib/supabase/client";
 
 const supabase = createClient();
 
-interface FileWithPreview extends File {
+export interface FileWithPreview extends File {
   preview?: string;
   errors: readonly FileError[];
 }
@@ -88,25 +88,6 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
       const validFiles = acceptedFiles
         .filter((file) => !files.find((x) => x.name === file.name))
         .map((file) => {
-          // const [firstWord] = file.name.split(".");
-
-          // // ✅ Validate first word
-          // if (
-          //   !["mobile", "backend", "frontend", "api", "server"].includes(
-          //     firstWord,
-          //   )
-          // ) {
-          //   (file as FileWithPreview).preview = URL.createObjectURL(file);
-          //   (file as FileWithPreview).errors = [
-          //     {
-          //       code: "invalid-prefix",
-          //       message:
-          //         "Filename must start with mobile, backend, frontend, api or server",
-          //     },
-          //   ];
-          //   return file as FileWithPreview;
-          // }
-
           (file as FileWithPreview).preview = URL.createObjectURL(file);
           (file as FileWithPreview).errors = [];
           return file as FileWithPreview;
@@ -182,6 +163,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
             cacheControl: cacheControl.toString(),
             upsert,
           });
+
         if (error) {
           return { name: file.name, message: error.message };
         } else {
@@ -202,8 +184,9 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
 
     // ✅ Trigger revalidation only when at least one upload succeeded
     if (responseSuccesses.length > 0) {
-      await revalidateFromClient("/files");
-      await revalidateFromClient("/docs");
+      revalidateFromClient("/files");
+      revalidateFromClient("/docs");
+      revalidateFromClient("/media");
 
       // ✅ Reset state back to "empty"
       setFiles([]);
