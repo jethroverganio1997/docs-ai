@@ -3,6 +3,7 @@
     "@std/": "https://deno.land/std@0.168.0/",
 
     "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.57.4",
+    "@ai-sdk/openai": "https://esm.sh/@ai-sdk/openai@2.0.32",
     "common-tags": "https://esm.sh/common-tags@1.8.2",
     "gray-matter": "https://esm.sh/gray-matter@4.0.3",
     "ai": "https://esm.sh/ai@5.0.45",

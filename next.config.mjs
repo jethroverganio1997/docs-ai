@@ -1,4 +1,4 @@
-import { withContentCollections } from '@content-collections/next';
+import { withContentCollections } from "@content-collections/next";
 
 /** @type {import('next').NextConfig} */
 const config = {
@@ -7,8 +7,7 @@ const config = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "pexipewlvozsyzoxkmgq.supabase.co",
-        pathname: "/storage/v1/object/public/**", // allow all paths inside storage
+        hostname: "**", // allow any HTTPS domain
       },
     ],
   },
