@@ -163,7 +163,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
             cacheControl: cacheControl.toString(),
             upsert,
           });
-
+          
         if (error) {
           return { name: file.name, message: error.message };
         } else {

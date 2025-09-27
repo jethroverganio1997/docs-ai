@@ -20,7 +20,7 @@ const getCachePage = cache(async (slug: string[] | undefined) => {
   return await getPage(slug);
 });
 
-export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
+export default async function Page(props: PageProps<"/docs/[...slug]">) {
   const params = await props.params;
   const cache = await getPage(params.slug);
   if (!cache) notFound();

@@ -16,6 +16,7 @@ export default async function Layout({ children }: LayoutProps<"/docs">) {
   const pageTree = await getCachedPageTree();
   const base = baseOptions();
 
+
   return (
     <DocsLayout
       tree={pageTree}

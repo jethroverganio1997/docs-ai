@@ -1,8 +1,7 @@
 import "@/app/global.css";
-import { RootProvider } from "fumadocs-ui/provider";
 import { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Providers from "../lib/providers";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
   title: "FEE Remit Docs",
@@ -30,9 +29,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <body className="flex flex-col min-h-screen">
-        <Providers>
-          <RootProvider>{children}</RootProvider>
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

@@ -59,11 +59,11 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (request.nextUrl.pathname === "/docs") { // <-- Add this log
-    const url = request.nextUrl.clone();
-    url.pathname = "/docs/introduction";
-    return NextResponse.redirect(url);
-  }
+  // if (request.nextUrl.pathname === "/docs") { // <-- Add this log
+  //   const url = request.nextUrl.clone();
+  //   url.pathname = "/docs/introduction";
+  //   return NextResponse.redirect(url);
+  // }
 
   return supabaseResponse;
 }

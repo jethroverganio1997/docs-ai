@@ -1,0 +1,19 @@
+{
+  "imports": {
+    "@std/": "https://deno.land/std@0.168.0/",
+
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.57.4",
+    "common-tags": "https://esm.sh/common-tags@1.8.2",
+    "gray-matter": "https://esm.sh/gray-matter@4.0.3",
+    "ai": "https://esm.sh/ai@5.0.45",
+
+    "mdast-util-from-markdown": "https://esm.sh/v132/mdast-util-from-markdown@2.0.0",
+    "mdast-util-to-markdown": "https://esm.sh/v132/mdast-util-to-markdown@2.1.0",
+    "mdast-util-to-string": "https://esm.sh/v132/mdast-util-to-string@4.0.0",
+    "unist-builder": "https://esm.sh/v132/unist-builder@4.0.0",
+    "mdast": "https://esm.sh/v132/@types/mdast@4.0.0/index.d.ts",
+    "marked": "https://esm.sh/marked@16.3.0",
+
+    "decode-named-character-reference": "https://esm.sh/decode-named-character-reference@1.2.0"
+  }
+}
