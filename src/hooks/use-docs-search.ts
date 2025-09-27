@@ -1,108 +1,78 @@
 // hooks/useDocsSearch.ts
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
+import { SortedResult, UseDocsSearchOptions, UseDocsSearchResult } from "../types/document-search";
 
-// --- Type Definitions ---
-
-export type HighlightedText = {
-  type: 'text';
-  content: string;
-  styles?: {
-    highlight?: boolean;
-  };
-};
-
-export type SortedResult = {
-  id: string;
-  url: string;
-  type: 'page' | 'heading' | 'text';
-  content: string;
-  contentWithHighlights?: HighlightedText[];
-};
-
-interface FetchOptions {
-  api?: string;
-  tag?: string | string[];
-  locale?: string;
-  /**
-   * Optional headers to include in the fetch request.
-   */
-  headers?: Record<string, string>; // ADDED
-}
-
-interface UseDocsSearchOptions extends FetchOptions {
-  delayMs?: number;
-  allowEmpty?: boolean;
-}
-
-interface UseDocsSearchResult {
-  search: string;
-  setSearch: (v: string) => void;
-  query: {
-    isLoading: boolean;
-    data?: SortedResult[] | 'empty';
-    error?: Error;
-  };
-}
 
 // --- The Hook Implementation ---
 
-export function useDocsSearch(options: UseDocsSearchOptions): UseDocsSearchResult {
+export function useDocsSearch(
+  options: UseDocsSearchOptions,
+): UseDocsSearchResult {
   const {
-    api = '/api/search',
-    delayMs = 200,
+    api = "/api/search",
+    delayMs = 500, // This is now our debounce delay
     allowEmpty = false,
-    headers, // ADDED
+    headers,
   } = options;
 
-  const [search, setSearch] = useState('');
-  const [query, setQuery] = useState<UseDocsSearchResult['query']>({
-    isLoading: false,
-    data: undefined,
-    error: undefined,
-  });
+  // 1. Live search term for the input field (immediate UI feedback)
+  const [search, setSearch] = useState("");
+
+  // 2. Debounced search term that will trigger the actual query
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   useEffect(() => {
-    if (!allowEmpty && !search.trim()) {
-      setQuery({ isLoading: false, data: undefined, error: undefined });
-      return;
-    }
-
-    setQuery((prev) => ({ ...prev, isLoading: true }));
-
     const handler = setTimeout(() => {
-      const performFetch = async () => {
-        try {
-          const params = new URLSearchParams();
-          params.set('query', search.trim());
-          
-          // Pass the headers object to the fetch call
-          const response = await fetch(`${api}?${params.toString()}`, {
-            headers, // ADDED
-          });
-
-          if (!response.ok) {
-            throw new Error(`Request failed with status ${response.status}`);
-          }
-
-          const result: SortedResult[] | 'empty' = await response.json();
-          setQuery({ isLoading: false, data: result, error: undefined });
-        } catch (e) {
-          setQuery({ isLoading: false, data: undefined, error: e as Error });
-        }
-      };
-
-      performFetch();
+      setDebouncedSearch(search);
     }, delayMs);
 
     return () => {
       clearTimeout(handler);
     };
-    // Add headers to the dependency array
-  }, [search, api, allowEmpty, delayMs, headers]); // MODIFIED
-  
+  }, [search, delayMs]);
+
+  const queryInfo = useQuery({
+    // The query key is an array that uniquely identifies this data.
+    // When `debouncedSearch` changes, TanStack Query will run the query.
+    queryKey: ["docsSearch", debouncedSearch], // Corrected line
+
+    // The function that performs the fetch
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.set("query", debouncedSearch.trim());
+
+      const response = await fetch(`${api}?${params.toString()}`, {
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+
+      return response.json() as Promise<SortedResult[] | "empty">;
+    },
+
+    // The query will only run if the debounced search term and headers are present
+    enabled: !!headers && (allowEmpty || !!debouncedSearch.trim()),
+
+    // Cache the data forever
+    // staleTime: Infinity,
+    staleTime: 5 * 60 * 1000, // 300000 milliseconds
+  });
+
   const stableSetSearch = useCallback((value: string) => {
     setSearch(value);
   }, []);
 
-  return { search, setSearch: stableSetSearch, query };
+  return {
+    search,
+    setSearch: stableSetSearch,
+    // 4. Map the result from useQuery to your expected `query` object shape
+    query: {
+      isLoading: queryInfo.isLoading,
+      data: queryInfo.data,
+      error: queryInfo.error as Error | undefined,
+    },
+  };
 }

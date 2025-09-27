@@ -8,7 +8,6 @@ import { Frontmatter } from "../types/frontmatter";
 // Name of your Supabase Storage bucket
 const BUCKET_NAME = "files";
 
-
 // This is a helper function to get all file paths from your database view.
 // You need a view or table that lists the paths of objects in your bucket.
 async function listAllFilePaths(): Promise<DocumentView[]> {
@@ -48,7 +47,7 @@ export async function getPage(slugs: string[] = []): Promise<{
     if (!slugs || slugs.length === 0) {
         // You could add logic here to find 'index.mdx' if you want a default root page
         // This will stop execution and render your app/not-found.tsx file
-        notFound();
+        return notFound();
     }
 
     const directPath = slugs.join("/") + ".mdx";
@@ -71,10 +70,10 @@ export async function getPage(slugs: string[] = []): Promise<{
         }
 
         // If both attempts fail, return the custom not-found page
-        throw new Error("Not Found Page!");
+        return notFound();
     } catch (err) {
         console.error("An unexpected error occurred in getPage:", err);
-        throw new Error("An unexpected error occurred");
+        return notFound();
     }
 }
 

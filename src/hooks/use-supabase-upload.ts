@@ -6,6 +6,7 @@ import {
 } from "react-dropzone";
 import { revalidateFromClient } from "../actions/files-actions";
 import { createClient } from "../lib/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 
 const supabase = createClient();
 
@@ -72,6 +73,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<{ name: string; message: string }[]>([]);
   const [successes, setSuccesses] = useState<string[]>([]);
+  const queryClient = useQueryClient();
 
   const isSuccess = useMemo(() => {
     if (errors.length === 0 && successes.length === 0) {
@@ -184,6 +186,10 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
 
     // ✅ Trigger revalidation only when at least one upload succeeded
     if (responseSuccesses.length > 0) {
+      //refresh search cache
+      queryClient.invalidateQueries({ queryKey: ['docsSearch'] });
+
+      // refresh server 
       revalidateFromClient("/files");
       revalidateFromClient("/docs");
       revalidateFromClient("/media");

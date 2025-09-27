@@ -1,15 +1,6 @@
 // supabase/functions/search/index.ts
 import { createClient } from "@supabase/supabase-js";
-
-// Define the types directly in the function or import from a shared file.
-// These should match the types in your front-end application.
-type HighlightedText = {
-  type: "text";
-  content: string;
-  styles?: {
-    highlight?: boolean;
-  };
-};
+import { HighlightedText, parseHighlights } from "../_lib/highlight-parser.ts";
 
 type SortedResult = {
   id: string;
@@ -28,28 +19,7 @@ type SearchResult = {
   rank: number;
 };
 
-// This helper function is the same as your API route version.
-function parseHighlights(highlightedString: string): HighlightedText[] {
-  const parts = highlightedString.split(/<mark>|<\/mark>/g);
-  const result: HighlightedText[] = [];
-
-  for (let i = 0; i < parts.length; i++) {
-    const part = parts[i];
-    if (part) {
-      result.push({
-        type: "text",
-        content: part,
-        styles: {
-          highlight: i % 2 === 1,
-        },
-      });
-    }
-  }
-  return result;
-}
-
 const ALLOWED_ORIGINS = [
-  "https://yourapp.com",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
 ];
@@ -78,12 +48,12 @@ Deno.serve(async (req) => {
     if (!ALLOWED_ORIGINS.includes(origin)) {
       return new Response("CORS not allowed", { status: 403 });
     }
+    console.log("before auth");
 
     const corsHeaders = {
       "Access-Control-Allow-Origin": origin,
       "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-      "Access-Control-Allow-Headers":
-        "authorization, x-client-info, apikey, content-type",
+      "Access-Control-Allow-Headers": "authorization, apikey, content-type",
     };
 
     // Handle preflight request (OPTIONS)
@@ -94,30 +64,22 @@ Deno.serve(async (req) => {
       });
     }
 
-    const authorization = req.headers.get("Authorization");
+    console.log("after options");
 
+    const authorization = req.headers.get("Authorization");
     if (!authorization) {
-      return new Response(
-        JSON.stringify({ error: `No authorization header passed` }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
+      return jsonResponse({ error: "Missing Authorization header" }, 401);
     }
+    console.log("after auth");
 
     // 1. Extract search query from the URL
     const { searchParams } = new URL(req.url);
     const query = searchParams.get("query");
 
     if (!query) {
-      return new Response(
-        JSON.stringify({ error: 'Query parameter "query" is required' }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
+      return new Response('Query parameter "query" is required', {
+        status: 400,
+      });
     }
     console.log(searchParams);
     // 2. Create a Supabase client
