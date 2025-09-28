@@ -213,7 +213,9 @@ ORDER BY rank DESC
 LIMIT 20;
 END;
 $$;
--- [1] Trigger to call function after file upload
+
 create trigger on_file_upload
-after
-insert on storage.objects for each row execute procedure private.handle_storage_update();
+after insert on storage.objects
+for each row
+when (new.bucket_id = 'files')
+execute procedure private.handle_storage_update();
