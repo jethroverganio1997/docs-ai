@@ -4,7 +4,7 @@ import {
   type FileRejection,
   useDropzone,
 } from "react-dropzone";
-import { revalidateFromClient } from "../actions/files-actions";
+import { revalidateFromClient } from "../features/files/actions/files-actions";
 import { createClient } from "../lib/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -165,7 +165,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
             cacheControl: cacheControl.toString(),
             upsert,
           });
-          
+
         if (error) {
           return { name: file.name, message: error.message };
         } else {
@@ -187,9 +187,9 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
     // ✅ Trigger revalidation only when at least one upload succeeded
     if (responseSuccesses.length > 0) {
       //refresh search cache
-      queryClient.invalidateQueries({ queryKey: ['docsSearch'] });
+      queryClient.invalidateQueries({ queryKey: ["docsSearch"] });
 
-      // refresh server 
+      // refresh server
       revalidateFromClient("/files");
       revalidateFromClient("/docs");
       revalidateFromClient("/media");

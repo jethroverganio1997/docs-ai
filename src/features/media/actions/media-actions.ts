@@ -1,7 +1,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { createClient } from "../lib/supabase/server";
-import { MediaObject } from "../types/media-object";
+import { createClient } from "../../../lib/supabase/server";
+import { MediaObject } from "../../../types/media-object";
 
 const BUCKET_NAME = "media";
 

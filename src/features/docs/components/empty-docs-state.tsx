@@ -8,6 +8,7 @@ export default function EmptyDocsPage() {
 
   return (
     <EmptyState
+      className="min-h-screen"
       icon={<Inbox className="h-6 w-6" />}
       title="No documents uploaded"
       description="You havent added any documents yet. Upload files to start building your collection."

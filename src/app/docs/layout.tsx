@@ -4,7 +4,7 @@ import { cache } from "react";
 import { getPageTree } from "../../lib/remote-source";
 import { createClient } from "../../lib/supabase/server";
 import { redirect } from "next/navigation";
-import { AISearchTrigger } from "../../components/fuma/ai-search";
+import { AISearchTrigger } from "../../features/search/components/ai-search";
 
 const getCachedPageTree = cache(async () => {
   return await getPageTree();

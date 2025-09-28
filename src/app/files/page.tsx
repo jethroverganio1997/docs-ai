@@ -1,6 +1,6 @@
-import { FileUpload } from "@/components/files/file-upload";
-import { getDocumentsView } from "../../actions/files-actions";
-import { FilesDataTable } from "../../components/files/file-table";
+import { FileUpload } from "@/features/files/components/file-upload";
+import { getDocumentsView } from "../../features/files/actions/files-actions";
+import { FilesDataTable } from "../../features/files/components/file-table";
 
 export default async function FilePage() {
   const documents = await getDocumentsView();

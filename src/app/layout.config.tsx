@@ -2,8 +2,8 @@ import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
 
 import { type LinkItemType } from "fumadocs-ui/layouts/docs";
 import { BookIcon, File, Image } from "lucide-react";
-import { CurrentUserAvatar } from "../components/supabase/current-user-avatar";
-import { LogoutButton } from "../components/auth/logout-button";
+import { CurrentUserAvatar } from "../features/auth/components/current-user-avatar";
+import { LogoutButton } from "../features/auth/components/logout-button";
 
 /**
  * Shared layout configurations
@@ -45,7 +45,7 @@ export const linkItems: LinkItemType[] = [
     // secondary items will be displayed differently on navbar
     secondary: false,
   },
-   {
+  {
     icon: <Image />,
     text: "Media",
     url: "/media",

@@ -3,7 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RootProvider } from "fumadocs-ui/provider";
 import { useMemo } from "react";
-import SupabaseSearchDialog from "../components/fulltext-search";
+import SupabaseSearchDialog from "../features/search/components/fulltext-search";
 // import { SearchDialog } from "fumadocs-ui/components/dialog/search";
 
 export default function Providers({ children }: { children: React.ReactNode }) {

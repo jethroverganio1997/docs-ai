@@ -14,7 +14,7 @@ import { Loader2, RefreshCw, SearchIcon, Send, X } from "lucide-react";
 import { buttonVariants } from "fumadocs-ui/components/ui/button";
 import { type UIMessage, useChat, type UseChatHelpers } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { Markdown } from "./markdown";
+import { Markdown } from "../../../components/fuma/markdown";
 import { Presence } from "@radix-ui/react-presence";
 import { cn } from "fumadocs-ui/utils/cn";
 import { Session } from "@supabase/supabase-js";

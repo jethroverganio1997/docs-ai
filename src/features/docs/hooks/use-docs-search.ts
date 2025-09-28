@@ -5,8 +5,8 @@ import {
   SortedResult,
   UseDocsSearchOptions,
   UseDocsSearchResult,
-} from "../types/document-search";
-import { createClient } from "../lib/supabase/client";
+} from "../../../types/document-search";
+import { createClient } from "../../../lib/supabase/client";
 
 // --- The Hook Implementation ---
 

@@ -1,7 +1,7 @@
 // src/app/docs/page.tsx
 import { redirect } from "next/navigation";
 import { getPageTree } from "@/lib/remote-source";
-import EmptyDocsPage from "@/components/media/empty-state";
+import EmptyDocsPage from "@/features/docs/components/empty-docs-state";
 
 export default async function DocsPage() {
   const pageTree = await getPageTree();

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { DocumentView } from "../types/document-view";
+import { DocumentView } from "../../../types/document-view";
 
 const BUCKET_NAME = "files";
 

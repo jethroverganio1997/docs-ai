@@ -30,15 +30,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DocumentView } from "../../types/document-view";
+import { DocumentView } from "../../../types/document-view";
 import {
   getFileName,
   getFilePath,
   getFileType,
   getFileUrl,
-} from "../../lib/utils";
-import { deleteFile, downloadFile } from "../../actions/files-actions";
-import { Badge } from "../ui/badge";
+} from "../../../lib/utils";
+import { deleteFile, downloadFile } from "../actions/files-actions.ts";
+import { Badge } from "../../../components/ui/badge";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 // export const columns: ColumnDef<DocumentView>[] = [

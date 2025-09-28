@@ -7,10 +7,10 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from "../ui/context-menu";
-import { getFileName } from "../../lib/utils";
-import { deleteMedia, getPublicUrl } from "../../actions/media-actions";
-import { MediaObject } from "../../types/media-object";
+} from "../../../components/ui/context-menu";
+import { getFileName } from "../../../lib/utils";
+import { deleteMedia, getPublicUrl } from "../actions/media-actions.ts";
+import { MediaObject } from "../../../types/media-object";
 
 export default function MediaCard({ image }: { image: MediaObject }) {
   const [loading, setLoading] = useState<"opening" | "delete" | null>(null);

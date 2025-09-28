@@ -23,7 +23,7 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div
-      className={`flex flex-col items-center justify-center min-h-screen text-center ${className}`}
+      className={`flex flex-col items-center justify-center text-center ${className}`}
     >
       <div className="max-w-md w-full p-8 text-center border-dashed">
         <div className="flex flex-col items-center space-y-4">

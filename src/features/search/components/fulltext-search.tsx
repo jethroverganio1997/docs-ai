@@ -13,7 +13,7 @@ import {
   SearchDialogOverlay,
   type SharedProps,
 } from "fumadocs-ui/components/dialog/search";
-import { useDocsSearch } from "../hooks/use-docs-search";
+import { useDocsSearch } from "../../docs/hooks/use-docs-search";
 
 export default function SupabaseSearchDialog(props: SharedProps) {
 
