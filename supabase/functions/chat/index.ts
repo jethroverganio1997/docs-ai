@@ -9,7 +9,7 @@ const openai = createOpenAI({
 });
 
 const ALLOWED_ORIGINS = [
-  "https://docs-ai-six.vercel.app",
+  "https://docs.jethroverganio.com",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
 ];
@@ -36,9 +36,9 @@ Deno.serve(async (req) => {
     const origin = req.headers.get("origin") || "";
 
     // Reject if not allowed
-    // if (!ALLOWED_ORIGINS.includes(origin)) {
-    //   return new Response("CORS not allowed", { status: 403 });
-    // }
+    if (!ALLOWED_ORIGINS.includes(origin)) {
+      return new Response("CORS not allowed", { status: 403 });
+    }
     console.log("before auth");
 
     const corsHeaders = {
