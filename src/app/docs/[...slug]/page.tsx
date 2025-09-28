@@ -10,10 +10,11 @@ import { createCompiler, parseFrontmatter } from "@fumadocs/mdx-remote";
 import { getPage } from "@/lib/remote-source";
 import { getMDXComponents } from "@/components/fuma/mdx-components";
 import { cache } from "react";
-import { remarkStructure } from "fumadocs-core/mdx-plugins";
+import { rehypeCode, remarkStructure } from "fumadocs-core/mdx-plugins";
 
 const compiler = createCompiler({
   remarkPlugins: [remarkStructure],
+  rehypePlugins: [rehypeCode],
 });
 
 const getCachePage = cache(async (slug: string[] | undefined) => {
