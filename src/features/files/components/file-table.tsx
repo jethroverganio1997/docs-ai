@@ -37,7 +37,7 @@ import {
   getFileType,
   getFileUrl,
 } from "../../../lib/utils";
-import { deleteFile, downloadFile } from "../actions/files-actions.ts";
+import { deleteFile, downloadFile } from "../actions/files-actions";
 import { Badge } from "../../../components/ui/badge";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
