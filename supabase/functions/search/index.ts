@@ -46,9 +46,9 @@ Deno.serve(async (req) => {
     // Handle CORS
     const origin = req.headers.get("origin") || "";
 
-    if (!ALLOWED_ORIGINS.includes(origin)) {
-      return new Response("CORS not allowed", { status: 403 });
-    }
+    // if (!ALLOWED_ORIGINS.includes(origin)) {
+    //   return new Response("CORS not allowed", { status: 403 });
+    // }
     console.log("before auth");
 
     const corsHeaders = {
