@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
         match_threshold: 0.5,
         match_count: 5,
       })
-      .select("content");
+      .select("content, url");
 
     if (matchError) {
       console.error(matchError);
@@ -120,8 +120,12 @@ Deno.serve(async (req) => {
     const injectedDocs = documents && documents.length > 0
       ? documents.map(({ content }) => content).join("\n\n")
       : "No documents found";
-
     console.log(injectedDocs);
+    
+    const injectedUrl = documents && documents.length > 0
+      ? [...new Set(documents.map(({ url }) => url))]
+      : [];
+    console.log(injectedUrl);
 
     // stream the ai response
     const result = streamText({
@@ -139,13 +143,21 @@ Deno.serve(async (req) => {
                 Context sections:
                 ${injectedDocs}
 
-                Answer as markdown (including related code snippets if available):`,
+                Answer as markdown (including related code snippets and image links if available):`,
 
       messages: convertToModelMessages(messages),
     });
 
     return result.toUIMessageStreamResponse({
       headers: corsHeaders,
+      messageMetadata: ({ part }) => {
+        // Send sources when the generation is finished
+        if (part.type === "finish") {
+          return {
+            sources: injectedUrl, // Attach the array of URLs
+          };
+        }
+      },
     });
   } catch (err) {
     console.error(err);

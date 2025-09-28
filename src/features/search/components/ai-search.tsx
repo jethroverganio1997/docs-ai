@@ -18,11 +18,21 @@ import { Markdown } from "../../../components/fuma/markdown";
 import { Presence } from "@radix-ui/react-presence";
 import { cn } from "fumadocs-ui/utils/cn";
 import { Session } from "@supabase/supabase-js";
+import Link from "next/link";
+import { getFileName } from "../../../lib/utils";
+
+
+// Define the shape of your custom metadata
+type MessageMetadata = {
+  sources?: string[];
+};
+// Create a new message type that includes your custom metadata
+export type CustomUIMessage = UIMessage<MessageMetadata>;
 
 const Context = createContext<{
   open: boolean;
   setOpen: (open: boolean) => void;
-  chat: UseChatHelpers<UIMessage>;
+  chat: UseChatHelpers<CustomUIMessage>;
 } | null>(null);
 
 function useChatContext() {
@@ -211,7 +221,7 @@ const roleName: Record<string, string> = {
 function Message({
   message,
   ...props
-}: { message: UIMessage } & ComponentProps<"div">) {
+}: { message: CustomUIMessage } & ComponentProps<"div">) {
   let markdown = "";
 
   for (const part of message.parts ?? []) {
@@ -238,27 +248,42 @@ function Message({
       <div className="prose text-sm">
         <Markdown text={markdown} />
       </div>
-      {/* {links && links.length > 0 ? (
+       {/* Render the sources from metadata if they exist */}
+          {message.role === 'assistant' && message.metadata?.sources && (
+            <div style={{ marginTop: '8px' }}>
+              <strong>Sources:</strong>
+              <ul>
+                {(message.metadata.sources as string[]).map((url, index) => (
+                  <li key={index}>
+                    <a href={url} target="_blank" rel="noopener noreferrer">
+                      {url}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+      {message.role === 'assistant' && message.metadata?.sources && message.metadata?.sources.length> 0 ? (
         <div className="mt-2 flex flex-row flex-wrap items-center gap-1">
-          {links.map((item, i) => (
+          {(message.metadata.sources as string[]).map((link, i) => (
             <Link
               key={i}
-              href={item.url}
-              className="block text-xs rounded-lg border p-3 hover:bg-fd-accent hover:text-fd-accent-foreground"
+              href={link}
+              className="block bg-secondary text-xs rounded-lg border p-3 hover:bg-fd-accent hover:text-fd-accent-foreground"
             >
-              <p className="font-medium">{item.title}</p>
-              <p className="text-fd-muted-foreground">Reference {item.label}</p>
+              <p className="font-medium">{getFileName(link)}</p>
+              <p className="text-fd-muted-foreground">Reference</p>
             </Link>
           ))}
         </div>
-      ) : null} */}
+      ) : null}
     </div>
   );
 }
 
 export function AISearchTrigger({ session }: { session: Session | null }) {
   const [open, setOpen] = useState(false);
-  const chat = useChat({
+  const chat = useChat<CustomUIMessage>({
     id: "search",
     transport: new DefaultChatTransport({
       api: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/chat`,

@@ -27,14 +27,17 @@ create or replace function match_document_embeddings(
   match_threshold float, 
   match_count int default 10
 )
-returns setof document_embeddings
+returns table (
+  content text,
+  url text
+)
 language plpgsql
 as $$
 #variable_conflict use_variable
 begin
   return query
-  select *
-  from document_embeddings
+  select document_embeddings.content, documents.url
+  from document_embeddings inner join documents on documents.id = document_embeddings.document_id
   where document_embeddings.embedding <#> query_embedding < -match_threshold
   order by document_embeddings.embedding <#> query_embedding asc
   limit match_count;

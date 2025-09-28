@@ -5,12 +5,11 @@ import { createClient } from "@supabase/supabase-js";
 import { embed } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 
-// [5] 
+// [5]
 
 const openai = createOpenAI({
   apiKey: Deno.env.get("OPENAI_API_KEY"),
 });
-
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL");
 const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
@@ -45,16 +44,16 @@ Deno.serve(async (req) => {
 
     // select the row which have null embeddings
     const { data: rows, error: selectError } = await supabase
-    .from(table)
-    .select(`id, ${contentColumn}` as "*")
-    .in("id", ids)
-    .is(embeddingColumn, null);
-    
+      .from(table)
+      .select(`id, ${contentColumn}` as "*")
+      .in("id", ids)
+      .is(embeddingColumn, null);
+
     if (selectError) {
       console.error(selectError);
       return jsonResponse({ error: "Embed data not found" }, 404);
     }
-    
+
     // for each row embed the raw data and update the row
     for (const row of rows) {
       const { id, [contentColumn]: content } = row;
