@@ -1,12 +1,14 @@
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { LargeSearchToggle } from "fumadocs-ui/components/layout/search-toggle";
 import { baseOptions, linkItems, logo } from "@/app/layout.config";
-import { AISearchTrigger } from "../../components/fuma";
+import { AISearchTrigger } from "../../components/fuma/ai-search-trigger";
 import { cn } from "fumadocs-ui/utils/cn";
 import { buttonVariants } from "fumadocs-ui/components/ui/button";
 import { Sparkles } from "lucide-react";
 import { cache } from "react";
 import { getPageTree } from "../../lib/remote-source";
+import { createClient } from "../../lib/supabase/server";
+import { redirect } from "next/navigation";
 
 const getCachedPageTree = cache(async () => {
   return await getPageTree();
@@ -14,8 +16,21 @@ const getCachedPageTree = cache(async () => {
 
 export default async function Layout({ children }: LayoutProps<"/docs">) {
   const pageTree = await getCachedPageTree();
-  const base = baseOptions();
+  const supabase = await createClient();
+  // 1. Securely validate the user's session
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
+  if (!user) {
+    return redirect("/auth/login");
+  }
+  // 2. Get the session details only if the user is validated
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const base = baseOptions();
 
   return (
     <DocsLayout
@@ -28,6 +43,7 @@ export default async function Layout({ children }: LayoutProps<"/docs">) {
             <div className="flex gap-1.5 max-md:hidden">
               <LargeSearchToggle className="flex-1" />
               <AISearchTrigger
+                session={session}
                 aria-label="Ask AI"
                 className={cn(
                   buttonVariants({
@@ -55,6 +71,7 @@ export default async function Layout({ children }: LayoutProps<"/docs">) {
         ),
         children: (
           <AISearchTrigger
+            session={session}
             className={cn(
               buttonVariants({
                 variant: "secondary",

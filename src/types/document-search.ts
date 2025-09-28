@@ -19,10 +19,6 @@ export interface FetchOptions {
   api?: string;
   tag?: string | string[];
   locale?: string;
-  /**
-   * Optional headers to include in the fetch request.
-   */
-  headers?: Record<string, string>; // ADDED
 }
 
 export interface UseDocsSearchOptions extends FetchOptions {

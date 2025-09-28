@@ -10,7 +10,6 @@ import {
 } from "react";
 import { Loader2, RefreshCw, Send, X } from "lucide-react";
 import { buttonVariants } from "../ui/fd-button";
-import Link from "fumadocs-core/link";
 import {
   Dialog,
   DialogClose,
@@ -22,11 +21,12 @@ import {
   DialogTitle,
 } from "@radix-ui/react-dialog";
 import { type UIMessage, useChat, type UseChatHelpers } from "@ai-sdk/react";
-import type { ProvideLinksToolSchema } from "../../lib/inkeep-qa-schema";
-import type { z } from "zod";
 import { DefaultChatTransport } from "ai";
-import { Markdown } from "./markdown";
+import { Response } from "@/components/ai-elements/response";
 import { cn } from "../../lib/utils";
+import { type Session } from "@supabase/supabase-js";
+import { Message, MessageContent } from "../ai-elements/message";
+import { Conversation, ConversationContent } from "../ai-elements/conversation";
 
 const ChatContext = createContext<UseChatHelpers<UIMessage> | null>(null);
 function useChatContext() {
@@ -205,65 +205,53 @@ function Input(props: ComponentProps<"textarea">) {
   );
 }
 
-const roleName: Record<string, string> = {
-  user: "you",
-  assistant: "fumadocs",
-};
+// const roleName: Record<string, string> = {
+//   user: "you",
+//   assistant: "feedocs",
+// };
 
-function Message({
-  message,
-  ...props
-}: { message: UIMessage } & ComponentProps<"div">) {
-  let markdown = "";
-  let links: z.infer<typeof ProvideLinksToolSchema>["links"] = [];
+// function Message({
+//   message,
+//   ...props
+// }: { message: UIMessage } & ComponentProps<"div">) {
+//   let markdown = "";
 
-  for (const part of message.parts ?? []) {
-    if (part.type === "text") {
-      markdown += part.text;
-      continue;
-    }
+//   for (const part of message.parts ?? []) {
+//     if (part.type === "text") {
+//       markdown += part.text;
+//       continue;
+//     }
+//   }
 
-    if (part.type === "tool-provideLinks" && part.input) {
-      links = (part.input as z.infer<typeof ProvideLinksToolSchema>).links;
-    }
-  }
-
-  return (
-    <div {...props}>
-      <p
-        className={cn(
-          "mb-1 text-sm font-medium text-fd-muted-foreground",
-          message.role === "assistant" && "text-fd-primary"
-        )}
-      >
-        {roleName[message.role] ?? "unknown"}
-      </p>
-      <div className="prose text-sm">
-        <Markdown text={markdown} />
-      </div>
-      {links && links.length > 0 ? (
-        <div className="mt-2 flex flex-row flex-wrap items-center gap-1">
-          {links.map((item, i) => (
-            <Link
-              key={i}
-              href={item.url}
-              className="block text-xs rounded-lg border p-3 hover:bg-fd-accent hover:text-fd-accent-foreground"
-            >
-              <p className="font-medium">{item.title}</p>
-              <p className="text-fd-muted-foreground">Reference {item.label}</p>
-            </Link>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
+//   return (
+//     <div {...props}>
+//       <p
+//         className={cn(
+//           "mb-1 text-sm font-medium text-fd-muted-foreground",
+//           message.role === "assistant" && "text-fd-primary"
+//         )}
+//       >
+//         {roleName[message.role] ?? "unknown"}
+//       </p>
+//       <div className="prose text-sm">
+//         <Markdown text={markdown} />
+//       </div>
+//     </div>
+//   );
+// }
+interface AISearchProps extends DialogProps {
+  session: Session | null;
 }
 
-export default function AISearch(props: DialogProps) {
+export default function AISearch({ session, ...props }: AISearchProps) {
   const chat = useChat({
     id: "search",
     transport: new DefaultChatTransport({
-      api: "/api/chat",
+      api: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/chat`,
+      headers: {
+        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        Authorization: `Bearer ${session?.access_token ?? ""}`,
+      },
     }),
   });
 
@@ -285,7 +273,7 @@ export default function AISearch(props: DialogProps) {
           <ChatContext value={chat}>
             <div className="px-3 py-2">
               <DialogTitle className="text-sm font-medium">
-                Inkeep AI
+                Powered by Open AI
               </DialogTitle>
               <DialogDescription className="text-xs text-fd-muted-foreground">
                 AI can be inaccurate, please verify the information.
@@ -313,9 +301,23 @@ export default function AISearch(props: DialogProps) {
                 }}
               >
                 <div className="flex flex-col gap-4 p-3">
-                  {messages.map((item) => (
-                    <Message key={item.id} message={item} />
-                  ))}
+                  <Conversation>
+                    <ConversationContent>
+                      {messages.map((message) => (
+                        <div key={message.id}>
+                          <Message from={message.role} key={message.id}>
+                            <MessageContent>
+                              {message.parts
+                                .filter((part) => part.type === "text")
+                                .map((part, index) => (
+                                  <Response key={index}>{part.text}</Response>
+                                ))}
+                            </MessageContent>
+                          </Message>
+                        </div>
+                      ))}
+                    </ConversationContent>
+                  </Conversation>
                 </div>
               </List>
             )}

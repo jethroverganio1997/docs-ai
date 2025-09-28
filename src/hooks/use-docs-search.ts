@@ -1,8 +1,12 @@
 // hooks/useDocsSearch.ts
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
-import { SortedResult, UseDocsSearchOptions, UseDocsSearchResult } from "../types/document-search";
-
+import {
+  SortedResult,
+  UseDocsSearchOptions,
+  UseDocsSearchResult,
+} from "../types/document-search";
+import { createClient } from "../lib/supabase/client";
 
 // --- The Hook Implementation ---
 
@@ -13,8 +17,8 @@ export function useDocsSearch(
     api = "/api/search",
     delayMs = 500, // This is now our debounce delay
     allowEmpty = false,
-    headers,
   } = options;
+  const supabase = createClient();
 
   // 1. Live search term for the input field (immediate UI feedback)
   const [search, setSearch] = useState("");
@@ -41,9 +45,13 @@ export function useDocsSearch(
     queryFn: async () => {
       const params = new URLSearchParams();
       params.set("query", debouncedSearch.trim());
+      const { data: { session } } = await supabase.auth.getSession();
 
       const response = await fetch(`${api}?${params.toString()}`, {
-        headers,
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        },
       });
 
       if (!response.ok) {
@@ -54,7 +62,7 @@ export function useDocsSearch(
     },
 
     // The query will only run if the debounced search term and headers are present
-    enabled: !!headers && (allowEmpty || !!debouncedSearch.trim()),
+    enabled: allowEmpty || !!debouncedSearch.trim(),
 
     // Cache the data forever
     // staleTime: Infinity,

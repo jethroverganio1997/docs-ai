@@ -14,15 +14,13 @@ import {
   type SharedProps,
 } from "fumadocs-ui/components/dialog/search";
 import { useDocsSearch } from "../hooks/use-docs-search";
-import { useSupabaseHeaders } from "../hooks/use-supabase-header";
 
 export default function SupabaseSearchDialog(props: SharedProps) {
-  const headers = useSupabaseHeaders();
 
   const { search, setSearch, query } = useDocsSearch({
     api: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/search`,
-    headers, // <-- pass here
   });
+
 
   return (
     <SearchDialog

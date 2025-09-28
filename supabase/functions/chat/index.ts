@@ -38,21 +38,24 @@ Deno.serve(async (req) => {
     if (!ALLOWED_ORIGINS.includes(origin)) {
       return new Response("CORS not allowed", { status: 403 });
     }
+    console.log("before auth");
 
-    const corsHeader = {
+    const corsHeaders = {
       "Access-Control-Allow-Origin": origin,
       "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
       "Access-Control-Allow-Headers":
-        "authorization, x-client-info, apikey, content-type",
+        "authorization,x-client-info, apikey, content-type",
     };
 
     // Handle preflight request (OPTIONS)
     if (req.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
-        headers: corsHeader,
+        headers: corsHeaders,
       });
     }
+
+    console.log("after options");
 
     const authorization = req.headers.get("Authorization");
     if (!authorization) {
@@ -142,7 +145,7 @@ Deno.serve(async (req) => {
     });
 
     return result.toUIMessageStreamResponse({
-      headers: corsHeader,
+      headers: corsHeaders,
     });
   } catch (err) {
     console.error(err);

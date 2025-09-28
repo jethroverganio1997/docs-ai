@@ -53,7 +53,8 @@ Deno.serve(async (req) => {
     const corsHeaders = {
       "Access-Control-Allow-Origin": origin,
       "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-      "Access-Control-Allow-Headers": "authorization, apikey, content-type",
+      "Access-Control-Allow-Headers":
+        "authorization,x-client-info, apikey, content-type",
     };
 
     // Handle preflight request (OPTIONS)
