@@ -52,3 +52,17 @@ on storage.objects for delete to authenticated using (
   bucket_id = 'media' and owner = auth.uid()
 );
 
+
+create or replace function get_media_by_user(user_id uuid)
+returns table (
+    id uuid,
+    name text,
+    created_at timestamptz
+)
+language sql
+as $$
+    select id, name, created_at
+    from storage.objects       -- fully qualified schema.table
+    where bucket_id = 'media' and owner = user_id
+    order by created_at desc;
+$$;
