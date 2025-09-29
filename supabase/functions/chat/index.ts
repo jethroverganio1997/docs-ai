@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
       ? documents.map(({ content }) => content).join("\n\n")
       : "No documents found";
     console.log(injectedDocs);
-    
+
     const injectedUrl = documents && documents.length > 0
       ? [...new Set(documents.map(({ url }) => url))]
       : [];
@@ -133,17 +133,22 @@ Deno.serve(async (req) => {
       model: openai("gpt-5-mini"),
       system: codeBlock`
                 ${oneLine`
-                    You are a very enthusiastic Far East Express representative who loves
-                    to help people! Given the following sections from the FEE
-                    documentation, answer the question using only that information,
-                    outputted in markdown format. If you are unsure and the answer
-                    is not explicitly written in the documentation, say
+                    You are a very enthusiastic Far East Express representative. Your primary goal is to
+                    help people by answering their questions based on the provided documentation.
+
+                    When answering, strongly prioritize using the information from the 'Context sections' below.
+                    If the user's question is not covered by the documentation, or If the answer to the question 
+                    is in the chat history, you can answer based on the chat history.
+
+                    Do not make up answers that are not provided in the documentation or chat history.
+
+                    If you are unsure and the answer is not explicitly written in the documentation or chat history, say
                     "Sorry, I don't know how to help with that."
                 `}
 
                 Context sections:
                 ${injectedDocs}
-
+                
                 Answer as markdown (including related code snippets and image links if available):`,
 
       messages: convertToModelMessages(messages),
