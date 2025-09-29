@@ -2,12 +2,11 @@
 
 import { getMedia } from "@/features/media/actions/media-actions";
 import MediaEmpty from "@/features/media/components/media-empty";
-import MediaCard from "@/features/media/components/media-card";
 import { MediaUpload } from "@/features/media/components/media-upload";
-import { MediaObject } from "@/types/media-object";
 import { useQuery } from "@tanstack/react-query";
 import MediaLoading from "@/features/media/components/media-loading";
 import MediaError from "@/features/media/components/media-error";
+import { ImageZoom } from "../../features/media/components/media-card";
 
 export default function MediaPage() {
   const {
@@ -16,7 +15,13 @@ export default function MediaPage() {
     isLoading,
     isError,
     error,
-  } = useQuery<MediaObject[], Error>({
+  } = useQuery<
+    {
+      name: string;
+      url: string;
+    }[],
+    Error
+  >({
     queryKey: ["media"],
     queryFn: getMedia, // Pass the server function directly
   });
@@ -30,8 +35,13 @@ export default function MediaPage() {
         <MediaError error={error} />
       ) : images && images.length > 0 ? (
         <div className="w-full grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {images.map((image) => (
-            <MediaCard key={image.id} image={image} />
+          {images.map((image, index) => (
+            <ImageZoom
+              key={index}
+              src={image.url}
+              name={image.name}
+              alt={"image" + index}
+            />
           ))}
         </div>
       ) : (
