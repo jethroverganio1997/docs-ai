@@ -17,16 +17,15 @@ import { DefaultChatTransport } from "ai";
 import { Markdown } from "../../../components/fuma/markdown";
 import { Presence } from "@radix-ui/react-presence";
 import { cn } from "fumadocs-ui/utils/cn";
-import { Session } from "@supabase/supabase-js";
 import Link from "next/link";
 import { getFileName } from "../../../lib/utils";
-
+import { createClient } from "../../../lib/supabase/client";
 
 // Define the shape of your custom metadata
 type MessageMetadata = {
   sources?: string[];
 };
-// Create a new message type that includes your custom metadata
+
 export type CustomUIMessage = UIMessage<MessageMetadata>;
 
 const Context = createContext<{
@@ -81,12 +80,24 @@ function SearchAIActions() {
 }
 
 function SearchAIInput(props: ComponentProps<"form">) {
+  const supabase = createClient();
   const { status, sendMessage, stop } = useChatContext();
   const [input, setInput] = useState("");
   const isLoading = status === "streaming" || status === "submitted";
-  const onStart = (e?: SyntheticEvent) => {
+  const onStart = async (e?: SyntheticEvent) => {
     e?.preventDefault();
-    void sendMessage({ text: input });
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    void sendMessage(
+      { text: input },
+      {
+        headers: {
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          Authorization: `Bearer ${session?.access_token ?? ""}`,
+        },
+      }
+    );
     setInput("");
   };
 
@@ -229,10 +240,6 @@ function Message({
       markdown += part.text;
       continue;
     }
-
-    // if (part.type === 'tool-provideLinks' && part.input) {
-    //   links = (part.input as z.infer<typeof ProvideLinksToolSchema>).links;
-    // }
   }
 
   return (
@@ -248,22 +255,24 @@ function Message({
       <div className="prose text-sm">
         <Markdown text={markdown} />
       </div>
-       {/* Render the sources from metadata if they exist */}
-          {message.role === 'assistant' && message.metadata?.sources && (
-            <div style={{ marginTop: '8px' }}>
-              <strong>Sources:</strong>
-              <ul>
-                {(message.metadata.sources as string[]).map((url, index) => (
-                  <li key={index}>
-                    <a href={url} target="_blank" rel="noopener noreferrer">
-                      {url}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-      {message.role === 'assistant' && message.metadata?.sources && message.metadata?.sources.length> 0 ? (
+      {/* Render the sources from metadata if they exist */}
+      {message.role === "assistant" && message.metadata?.sources && (
+        <div style={{ marginTop: "8px" }}>
+          <strong>Sources:</strong>
+          <ul>
+            {(message.metadata.sources as string[]).map((url, index) => (
+              <li key={index}>
+                <a href={url} target="_blank" rel="noopener noreferrer">
+                  {url}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {message.role === "assistant" &&
+      message.metadata?.sources &&
+      message.metadata?.sources.length > 0 ? (
         <div className="mt-2 flex flex-row flex-wrap items-center gap-1">
           {(message.metadata.sources as string[]).map((link, i) => (
             <Link
@@ -281,16 +290,13 @@ function Message({
   );
 }
 
-export function AISearchTrigger({ session }: { session: Session | null }) {
+export function AISearchTrigger() {
   const [open, setOpen] = useState(false);
+  //the headers are on onSendMessage
   const chat = useChat<CustomUIMessage>({
     id: "search",
     transport: new DefaultChatTransport({
       api: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/chat`,
-      headers: {
-        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        Authorization: `Bearer ${session?.access_token ?? ""}`,
-      },
     }),
   });
 
