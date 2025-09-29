@@ -1,0 +1,84 @@
+After 1 year cert will be expired and you wont be able to push update in appstore thru ci/cd thats why you need to generate new cert 
+
+# The Process
+Creating a p12 file can be a little confusing the first time, as you need to use often unnoticed pieces of software on your computer, as well as the Apple Developer web interface (which has got better in recent years).
+
+## STEP 1: Create a “.certSigningRequest” (CSR) file
+- Open Keychain Access on your Mac (found in Applications/Utilities)
+- In the toolbar, open Keychain Access > Certificate Assistant > Request a Certificate From a Certificate Authority
+
+![alt text](<https://jcrdavrpicwuswrkbtkt.supabase.co/storage/v1/object/public/media/ios-cert1.png>)
+
+- Enter the email address and common name that  you used to register in the iOS Developer Program
+NOTE: Common name should be the name of the developer as it appears in your Apple Developer Account
+- Leave the CA Email blank and make sure “Saved to disk” is selected
+Click Continue
+- Choose a filename & destination on your hard drive
+(e.g. “CertificateSigningRequest.certSigningRequest”)
+- Click Save
+- This will create and save your certSigningRequest file (CSR) to your hard drive. A public and private key will also be created in Keychain Access with the Common Name you entered earlier (e.g. Jo Smith)
+
+![alt text](<https://jcrdavrpicwuswrkbtkt.supabase.co/storage/v1/object/public/media/ios-cert2.png>)
+
+## STEP 2: Create the “.cer” file in your iOS Developer Account
+- Log on to https://developer.apple.com
+- Click “Certificates, IDs & Profiles” > "Certificates"
+- Click the Add (+) button
+
+![alt text](<https://jcrdavrpicwuswrkbtkt.supabase.co/storage/v1/object/public/media/ios-cert3.png>)
+
+- Choose “iOS Distribution (App Store and Ad Hoc) and press “Continue”
+
+![alt text](<https://jcrdavrpicwuswrkbtkt.supabase.co/storage/v1/object/public/media/ios-cert4.png>)
+
+- Select the CSR file you created previously and press “Continue”.
+
+![alt text](<https://jcrdavrpicwuswrkbtkt.supabase.co/storage/v1/object/public/media/ios-cert5.png>)
+
+- Press download
+
+![alt text](<https://jcrdavrpicwuswrkbtkt.supabase.co/storage/v1/object/public/media/ios-cert6.png>)
+
+## STEP 3: Install the .cer and generate the .p12
+- Find the .cer file you’ve just downloaded and double-click. If the certificate hasn’t automatically been installed, you will see the following (otherwise, skip the next two steps):
+- Open up KeyChain Access again
+- Find the two profiles you created in Step 1
+
+![alt text](<https://jcrdavrpicwuswrkbtkt.supabase.co/storage/v1/object/public/media/ios-cert7.png>)
+
+- You should now be able to expand the “private key” profile, which should show the certificate you just added
+- Select only these two items (not the public key), by holding SHIFT and clicking both items, then right click and click “Export 2 items…” from the popup
+
+![alt text](<https://jcrdavrpicwuswrkbtkt.supabase.co/storage/v1/object/public/media/ios-cert8.png>)
+
+- In the next window, make sure the file format is a “.p12” and choose a filename and destination on your hard drive
+
+![alt text](<https://jcrdavrpicwuswrkbtkt.supabase.co/storage/v1/object/public/media/ios-cert9.png>)
+
+- Click Save
+- Finally, you’ll be prompted to set a password – you can leave these both blank if you desire.
+
+## STEP 4: Create the Provisioning Profiles using your Bundle ID (Identifiers)
+
+- Click “Certificates, IDs & Profiles” > "Profiles"
+- Click the Add (+) button
+
+![alt text](<https://jcrdavrpicwuswrkbtkt.supabase.co/storage/v1/object/public/media/ios-cert10.png>)
+
+- Choose App Store Connect and Continue
+
+![alt text](<https://jcrdavrpicwuswrkbtkt.supabase.co/storage/v1/object/public/media/ios-cert11.png>)
+
+- Select you app bundle id and continue
+
+![alt text](<https://jcrdavrpicwuswrkbtkt.supabase.co/storage/v1/object/public/media/ios-cert12.png>)
+
+- Select the certificate you created previously and continue
+
+![alt text](<https://jcrdavrpicwuswrkbtkt.supabase.co/storage/v1/object/public/media/ios-cert13.png>)
+
+- Click generate and download your cerificate
+
+## STEP 5: Generate API key 
+
+![alt text](<https://jcrdavrpicwuswrkbtkt.supabase.co/storage/v1/object/public/media/ios-cert14.png>)

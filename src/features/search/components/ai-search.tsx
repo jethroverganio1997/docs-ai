@@ -238,6 +238,7 @@ function Message({
   for (const part of message.parts ?? []) {
     if (part.type === "text") {
       markdown += part.text;
+      console.log(part.text);
       continue;
     }
   }
@@ -255,21 +256,6 @@ function Message({
       <div className="prose text-sm">
         <Markdown text={markdown} />
       </div>
-      {/* Render the sources from metadata if they exist */}
-      {message.role === "assistant" && message.metadata?.sources && (
-        <div style={{ marginTop: "8px" }}>
-          <strong>Sources:</strong>
-          <ul>
-            {(message.metadata.sources as string[]).map((url, index) => (
-              <li key={index}>
-                <a href={url} target="_blank" rel="noopener noreferrer">
-                  {url}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
       {message.role === "assistant" &&
       message.metadata?.sources &&
       message.metadata?.sources.length > 0 ? (
