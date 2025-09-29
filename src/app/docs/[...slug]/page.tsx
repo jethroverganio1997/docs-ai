@@ -34,12 +34,7 @@ export default async function Page(props: PageProps<"/docs/[...slug]">) {
   const MdxContent = compiled.body;
 
   return (
-    <DocsPage
-      toc={compiled.toc}
-      breadcrumb={{
-        enabled: false,
-      }}
-    >
+    <DocsPage toc={compiled.toc}>
       <DocsTitle>{cache.frontmatter.title}</DocsTitle>
       <DocsDescription>{cache.frontmatter.description}</DocsDescription>
       <DocsBody>

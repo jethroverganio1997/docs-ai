@@ -1,7 +1,7 @@
 // app/dashboard/error.tsx
 "use client"; // This is a required directive
 
-export default function Error({
+export default function FilesError({
   error,
 }: {
   error: Error & { digest?: string };

@@ -1,19 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card } from "@/components/ui/card";
-
-export default function MediaLoading() {
+export default function FilesLoading() {
   return (
-    <div className="w-full max-w-4xl mx-auto p-6 space-y-6">
-      {/* Upload Area Skeleton */}
-      <Card className="border-2 border-dashed border-muted-foreground/25 bg-muted/10">
-        <div className="flex flex-col items-center justify-center py-5 px-6 space-y-2">
-          <Skeleton className="h-8 w-8 rounded-full" />
-          <Skeleton className="h-5 w-24" />
-          <Skeleton className="h-4 w-64" />
-          <Skeleton className="h-3 w-40" />
-        </div>
-      </Card>
-
+    <div className="w-full max-w-4xl mt-4 mx-auto space-y-6">
       {/* Filter Input Skeleton */}
       <div className="space-y-2">
         <Skeleton className="h-8 w-full max-w-sm rounded-md" />

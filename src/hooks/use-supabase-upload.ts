@@ -54,6 +54,7 @@ type UseSupabaseUploadOptions = {
    * When set to false, an error is thrown if the object already exists. Defaults to `false`
    */
   upsert?: boolean;
+  onSuccess?: () => void;
 };
 
 type UseSupabaseUploadReturn = ReturnType<typeof useSupabaseUpload>;
@@ -67,6 +68,7 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
     maxFiles = 1,
     cacheControl = 3600,
     upsert = false,
+    onSuccess,
   } = options;
 
   const [files, setFiles] = useState<FileWithPreview[]>([]);
@@ -189,10 +191,12 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
       //refresh search cache
       queryClient.invalidateQueries({ queryKey: ["docsSearch"] });
 
+      if (onSuccess) {
+        onSuccess();
+      }
+
       // refresh server
-      revalidateFromClient("/files");
       revalidateFromClient("/docs");
-      revalidateFromClient("/media");
 
       // ✅ Reset state back to "empty"
       setFiles([]);

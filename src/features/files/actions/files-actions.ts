@@ -43,7 +43,6 @@ export async function deleteFile(path: string | null) {
   const { error } = await supabase.storage.from(BUCKET_NAME).remove([path]);
   if (error) throw error;
 
-  revalidatePath("/files");
   revalidatePath("/docs");
   return true;
 }

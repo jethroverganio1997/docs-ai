@@ -183,6 +183,7 @@ export function FilesDataTable({ data }: DocumentTableProps) {
       // IMPORTANT: Invalidate the query that fetches the table data.
       // Replace ['documents'] with the actual query key you use to fetch this data.
       queryClient.invalidateQueries({ queryKey: ["docsSearch"] });
+      queryClient.invalidateQueries({ queryKey: ["files"] });
     },
     onError: (error) => {
       // Optional: Handle errors, e.g., show a toast notification

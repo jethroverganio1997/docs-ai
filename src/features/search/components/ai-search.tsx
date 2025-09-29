@@ -38,6 +38,14 @@ function useChatContext() {
   return use(Context)!.chat;
 }
 
+function useAIContext() {
+  const context = use(Context);
+  if (!context) {
+    throw new Error("useAIContext must be used within the Context.Provider");
+  }
+  return context;
+}
+
 function SearchAIActions() {
   const { messages, status, setMessages, regenerate } = useChatContext();
   const isLoading = status === "streaming";
@@ -233,6 +241,7 @@ function Message({
   message,
   ...props
 }: { message: CustomUIMessage } & ComponentProps<"div">) {
+  const { setOpen } = useAIContext();
   let markdown = "";
 
   for (const part of message.parts ?? []) {
@@ -264,6 +273,7 @@ function Message({
             <Link
               key={i}
               href={link}
+              onClick={() => setOpen(false)}
               className="block bg-secondary text-xs rounded-lg border p-3 hover:bg-fd-accent hover:text-fd-accent-foreground"
             >
               <p className="font-medium">{getFileName(link)}</p>

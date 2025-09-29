@@ -2,7 +2,7 @@
 import { EmptyState } from "@/components/empty-state";
 import { Inbox } from "lucide-react";
 
-export default function EmptyMediaPage() {
+export default function MediaEmpty() {
   return (
     <EmptyState
       className="min-h-[400px]"
