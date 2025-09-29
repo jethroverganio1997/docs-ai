@@ -66,7 +66,11 @@ function Pre(props: ComponentProps<"pre">) {
   if (lang === "mdx") lang = "md";
 
   return (
-    <DynamicCodeBlock lang={lang} code={(codeProps.children ?? "") as string} />
+    <DynamicCodeBlock
+      lang={lang}
+      code={(codeProps.children ?? "") as string}
+     
+    />
   );
 }
 

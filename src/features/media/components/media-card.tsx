@@ -54,7 +54,7 @@ export function ImageZoom({
       await navigator.clipboard.writeText(src);
 
       // It's good practice to notify the user of success
-      alert("URL copied to clipboard!");
+      // alert("URL copied to clipboard!");
     },
     onError: (error) => {
       alert(`Failed to copy URL: ${error.message}`);
@@ -66,7 +66,7 @@ export function ImageZoom({
   return (
     <Dialog open={open}>
       <DialogTrigger asChild>
-        <button
+        <div
           className={cn(
             "relative aspect-square overflow-hidden group w-full h-full  rounded-lg",
             "transition-all duration-200 hover:opacity-90",
@@ -83,7 +83,7 @@ export function ImageZoom({
             quality={50}
             loading="lazy"
             placeholder="blur"
-            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNUU7KvBwACBQEIpapm0AAAAABJRU5ErkJggg=="
+            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mO0OAMAAUIBBnFrxGwAAAAASUVORK5CYII="
             className="object-contain"
           />
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-2">
@@ -120,7 +120,7 @@ export function ImageZoom({
               <Loader2 className="h-4 w-4 animate-spin mt-2" />
             </div>
           )}
-        </button>
+        </div>
       </DialogTrigger>
 
       <DialogContent
