@@ -2,6 +2,9 @@ import { withContentCollections } from "@content-collections/next";
 
 /** @type {import('next').NextConfig} */
 const config = {
+  experimental: {
+    ppr: "incremental",
+  },
   reactStrictMode: true,
   images: {
     remotePatterns: [
