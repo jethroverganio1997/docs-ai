@@ -1,6 +1,5 @@
-
 import { getMedia } from "../_lib/actions";
-import { unstable_cache } from "next/cache";
+import { unstable_cache as cacheTag } from "next/cache";
 import MediaEmpty from "../empty";
 import { ImageCard } from "./media-card";
 import { cookies } from "next/headers";
@@ -9,7 +8,7 @@ import { MEDIA_IMAGES_KEY, MEDIA_IMAGES_TAG } from "../_lib/constants";
 export default async function MediaImages() {
   const cookieStore = cookies();
 
-  const getImages = unstable_cache(
+  const getImages = cacheTag(
     async () => {
       return await getMedia(cookieStore);
     },

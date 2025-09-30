@@ -2,8 +2,8 @@ import matter from "gray-matter";
 import { PageTree } from "fumadocs-core/server";
 import { createClient } from "./supabase/server";
 import { notFound } from "next/navigation";
-import { Frontmatter } from "../types/frontmatter";
 import { FilesDocuments } from "../app/files/_lib/types";
+import { Frontmatter } from "../features/search/types";
 
 // Name of your Supabase Storage bucket
 const BUCKET_NAME = "files";

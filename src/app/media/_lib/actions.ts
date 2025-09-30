@@ -2,9 +2,8 @@
 
 import { revalidateTag } from "next/cache";
 import { createClient } from "../../../lib/supabase/server";
-import { MediaObject } from "../../../types/media-object";
 import { cookies } from "next/headers";
-import { BUCKET_MEDIA_NAME, MEDIA_IMAGES_TAG} from "./constants";
+import { BUCKET_MEDIA_NAME, MEDIA_IMAGES_TAG } from "./constants";
 import { MediaType } from "./types";
 
 export async function getMedia(
@@ -25,7 +24,7 @@ export async function getMedia(
         return [];
     }
 
-    const urls = images.map((image: MediaObject) => {
+    const urls = images.map((image: MediaType) => {
         // Construct the transformable URL
         const { data } = supabase.storage
             .from(BUCKET_MEDIA_NAME)

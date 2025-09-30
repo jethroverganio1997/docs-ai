@@ -45,6 +45,7 @@ function createProcessor(): Processor {
 
 function Image(props: ComponentPropsWithoutRef<"img">) {
   return (
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       {...props}
       alt={props.alt ?? "image"}

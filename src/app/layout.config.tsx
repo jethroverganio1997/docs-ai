@@ -2,8 +2,8 @@ import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
 
 import { type LinkItemType } from "fumadocs-ui/layouts/docs";
 import { BookIcon, File, Image } from "lucide-react";
-import { CurrentUserAvatar } from "../features/auth/components/current-user-avatar";
-import { LogoutButton } from "../features/auth/components/logout-button";
+import { CurrentUserAvatar } from "./auth/_components/current-user-avatar";
+import { LogoutButton } from "./auth/_components/logout-button";
 
 /**
  * Shared layout configurations
@@ -34,7 +34,6 @@ export const linkItems: LinkItemType[] = [
     text: "Docs",
     url: "/docs",
     active: "nested-url",
-    // secondary items will be displayed differently on navbar
     secondary: false,
   },
   {
@@ -42,15 +41,14 @@ export const linkItems: LinkItemType[] = [
     text: "Files",
     url: "/files",
     active: "nested-url",
-    // secondary items will be displayed differently on navbar
     secondary: false,
   },
   {
+    // eslint-disable-next-line jsx-a11y/alt-text
     icon: <Image />,
     text: "Media",
     url: "/media",
     active: "nested-url",
-    // secondary items will be displayed differently on navbar
     secondary: false,
   },
   {

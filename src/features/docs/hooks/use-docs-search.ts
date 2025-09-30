@@ -1,12 +1,8 @@
 // hooks/useDocsSearch.ts
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
-import {
-  SortedResult,
-  UseDocsSearchOptions,
-  UseDocsSearchResult,
-} from "../../../types/document-search";
 import { createClient } from "../../../lib/supabase/client";
+import { SortedResult, UseDocsSearchOptions, UseDocsSearchResult } from "../../search/types";
 
 // --- The Hook Implementation ---
 
