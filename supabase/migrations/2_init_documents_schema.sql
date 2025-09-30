@@ -49,9 +49,13 @@ create view documents_with_storage_path with (security_invoker = true) as
 select documents.id,
   documents.name,
   documents.created_at,
-  storage.objects.name as storage_object_path
+  storage.objects.name as storage_object_path,
+  storage.objects.updated_at as updated_at
 from documents
-  join storage.objects on storage.objects.id = documents.storage_object_id;
+  join storage.objects on storage.objects.id = documents.storage_object_id
+order by storage.objects.updated_at desc
+limit 10 
+
 -- Enable RLS
 alter table documents enable row level security;
 alter table document_embeddings enable row level security;
@@ -213,9 +217,7 @@ ORDER BY rank DESC
 LIMIT 20;
 END;
 $$;
-
 create trigger on_file_upload
-after insert on storage.objects
-for each row
-when (new.bucket_id = 'files')
-execute procedure private.handle_storage_update();
+after
+insert on storage.objects for each row
+  when (new.bucket_id = 'files') execute procedure private.handle_storage_update();

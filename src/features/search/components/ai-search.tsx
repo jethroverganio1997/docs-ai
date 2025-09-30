@@ -14,11 +14,11 @@ import { Loader2, RefreshCw, SearchIcon, Send, X } from "lucide-react";
 import { buttonVariants } from "fumadocs-ui/components/ui/button";
 import { type UIMessage, useChat, type UseChatHelpers } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { Markdown } from "../../../components/fuma/markdown";
+import { Markdown } from "../../../components/mdx/markdown";
 import { Presence } from "@radix-ui/react-presence";
 import { cn } from "fumadocs-ui/utils/cn";
 import Link from "next/link";
-import { getFileName } from "../../../lib/utils";
+import { getFileName } from "../../../lib/helpers";
 import { createClient } from "../../../lib/supabase/client";
 
 // Define the shape of your custom metadata

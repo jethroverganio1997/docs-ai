@@ -6,20 +6,16 @@ import {
   DropzoneEmptyState,
 } from "@/components/supabase/dropzone";
 import { useSupabaseUpload } from "@/hooks/use-supabase-upload";
-import { useQueryClient } from "@tanstack/react-query";
+import { BUCKET_FILE_NAME } from "../_lib/constants";
 
-const FileUpload = () => {
-  const queryClient = useQueryClient();
-
+export default function FileUpload() {
   const props = useSupabaseUpload({
-    bucketName: "files",
+    bucketName: BUCKET_FILE_NAME,
     path: "",
     allowedMimeTypes: ["text/mdx"],
     maxFiles: 1,
     maxFileSize: 1000 * 1000 * 10, // 10MB,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["files"] });
-    },
+    upsert: true,
   });
 
   return (
@@ -30,6 +26,4 @@ const FileUpload = () => {
       </Dropzone>
     </div>
   );
-};
-
-export { FileUpload };
+}

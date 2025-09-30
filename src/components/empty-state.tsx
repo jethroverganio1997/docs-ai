@@ -1,52 +1,50 @@
-"use client";
 
-import type React from "react";
-import { Button } from "@/components/ui/button";
+import type React from "react"
+
+import { FileX, Search, Inbox, Image } from "lucide-react"
 
 interface EmptyStateProps {
-  icon?: React.ReactNode;
-  title: string;
-  description: string;
-  action?: {
-    label: string;
-    onClick: () => void;
-  };
-  className?: string;
+  icon?: "inbox" | "search" | "file" | "custom" | "image"
+  customIcon?: React.ReactNode
+  title: string
+  description: string
 }
 
 export function EmptyState({
-  icon,
+  icon = "inbox",
+  customIcon,
   title,
   description,
-  action,
-  className = "",
 }: EmptyStateProps) {
-  return (
-    <div
-      className={`flex flex-col items-center justify-center text-center ${className}`}
-    >
-      <div className="max-w-md w-full p-8 text-center border-dashed">
-        <div className="flex flex-col items-center space-y-4">
-          {icon && (
-            <div className="p-3 rounded-full bg-muted text-muted-foreground">
-              {icon}
-            </div>
-          )}
+  const iconMap = {
+    inbox: Inbox,
+    search: Search,
+    file: FileX,
+    image: Image,
+    custom: null,
+  }
 
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-balance">{title}</h3>
-            <p className="text-sm text-muted-foreground text-pretty leading-relaxed">
-              {description}
-            </p>
+  const IconComponent = customIcon ? null : iconMap[icon]
+
+  return (
+    <div className="flex min-h-[400px] w-full items-center justify-center p-8">
+      <div className="w-full max-w-md">
+        <div className="flex flex-col items-center justify-center space-y-2 p-12 text-center">
+          <div className="p-6">
+            {customIcon ? (
+              <div className="h-12 w-12 text-muted-foreground">{customIcon}</div>
+            ) : IconComponent ? (
+              <IconComponent className="h-12 w-12 text-muted-foreground" />
+            ) : null}
           </div>
 
-          {action && (
-            <Button onClick={action.onClick} className="mt-4">
-              {action.label}
-            </Button>
-          )}
+          <div className="space-y-2">
+            <h3 className="text-balance text-2xl font-semibold tracking-tight">{title}</h3>
+            <p className="text-pretty text-sm text-muted-foreground leading-relaxed max-w-sm">{description}</p>
+          </div>
+
         </div>
       </div>
     </div>
-  );
+  )
 }

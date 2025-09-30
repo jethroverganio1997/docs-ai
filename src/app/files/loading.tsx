@@ -16,16 +16,18 @@ export default function FilesLoading() {
 
         {/* Table Rows */}
         <div className="divide-y">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <div key={index} className="px-4 py-3">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className="px-4 py-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-8 flex-1">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-6 w-12 rounded-full" />
+                <div className="flex items-center space-x-12 flex-1">
                   <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-12 rounded-full" />
+                  <Skeleton className="h-4 w-32" />
                 </div>
-                <Skeleton className="h-8 w-8 rounded-md" />
+                <div className="flex items-center justify-end space-x-12 flex-1 pr-6">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-8 rounded-md" />
+                </div>
               </div>
             </div>
           ))}

@@ -8,7 +8,7 @@ import {
 import { notFound } from "next/navigation";
 import { createCompiler, parseFrontmatter } from "@fumadocs/mdx-remote";
 import { getPage } from "@/lib/remote-source";
-import { getMDXComponents } from "@/components/fuma/mdx-components";
+import { getMDXComponents } from "@/components/mdx/mdx-components";
 import { cache } from "react";
 import { rehypeCode, remarkStructure } from "fumadocs-core/mdx-plugins";
 

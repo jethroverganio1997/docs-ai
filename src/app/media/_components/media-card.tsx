@@ -10,21 +10,22 @@ import {
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useState } from "react";
-import { Button } from "../../../components/ui/button";
-import { Copy, ExternalLink, Loader2, Trash, Trash2 } from "lucide-react";
-import { deleteMedia } from "../actions/media-actions";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Copy, ExternalLink, Trash2 } from "lucide-react";
+import { deleteMedia } from "../_lib/actions";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface ImageZoomProps {
-  src: string;
+  url: string;
   name: string;
   alt: string;
   className?: string;
   zoomedClassName?: string;
 }
 
-export function ImageZoom({
-  src,
+export function ImageCard({
+  url,
   name,
   alt,
   className,
@@ -32,36 +33,16 @@ export function ImageZoom({
   ...props
 }: ImageZoomProps) {
   const [open, setOpen] = useState(false);
-  const queryClient = useQueryClient();
 
-  // 3. Create a mutation for the delete action
-  const { mutate: handleDelete, isPending: isDeleting } = useMutation({
-    mutationFn: () => deleteMedia(name),
-    onSuccess: () => {
-      // ✅ This is the key part for refreshing your list!
-      // Replace ['media'] with the actual queryKey you use to fetch the media list.
-      queryClient.invalidateQueries({ queryKey: ["media"] });
-    },
-    onError: (error) => {
-      alert(`Failed to delete file: ${error.message}`);
+  const deleteMutation = useMutation({
+    mutationFn: async (name: string) => {
+      return toast.promise(deleteMedia(name), {
+        loading: "Deleting image...",
+        success: "Successfully deleted image.",
+        error: (err: Error) => `Failed to image file: ${err.message}`,
+      });
     },
   });
-
-  const { mutate: handleCopyUrl, isPending: isCopying } = useMutation({
-    mutationFn: async () => {
-      // const data = await getPublicUrl(name);
-      // await navigator.clipboard.writeText(data.publicUrl);
-      await navigator.clipboard.writeText(src);
-
-      // It's good practice to notify the user of success
-      // alert("URL copied to clipboard!");
-    },
-    onError: (error) => {
-      alert(`Failed to copy URL: ${error.message}`);
-    },
-  });
-
-  const isAnyLoading = isCopying || isDeleting;
 
   return (
     <Dialog open={open}>
@@ -76,21 +57,23 @@ export function ImageZoom({
           {...props}
         >
           <Image
-            src={src}
+            src={url}
             alt={alt}
             fill
             sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 17vw"
-            quality={50}
             loading="lazy"
             placeholder="blur"
             blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mO0OAMAAUIBBnFrxGwAAAAASUVORK5CYII="
-            className="object-contain"
+            className="object-cover"
           />
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-2">
             <Button
               size="sm"
               variant="secondary"
-              onClick={() => handleCopyUrl()}
+              onClick={async () => {
+                await navigator.clipboard.writeText(url);
+                toast.success("Successfully copied to clipboard");
+              }}
               className="bg-background/90 hover:bg-background text-foreground"
             >
               <Copy className="w-4 h-4 mr-2" />
@@ -108,27 +91,20 @@ export function ImageZoom({
             <Button
               size="sm"
               variant="destructive"
-              onClick={() => handleDelete()}
+              onClick={() => deleteMutation.mutate(name)}
               className="bg-destructive/90 hover:bg-destructive text-destructive-foreground"
             >
               <Trash2 className="w-4 h-4" />
             </Button>
           </div>
-          {isAnyLoading && (
-            <div className="absolute inset-0 bg-muted/80 flex flex-col items-center justify-center text-sm backdrop-blur-sm">
-              {isDeleting && <Trash />}
-              <Loader2 className="h-4 w-4 animate-spin mt-2" />
-            </div>
-          )}
         </div>
       </DialogTrigger>
 
       <DialogContent
-        // remove border, background, shadow, and close button
         className={cn(
           "max-w-[95vw] max-h-[95vh] w-auto h-auto p-0 border-0 bg-transparent shadow-none",
-          "data-[state=open]:animate-none", // disable animations if you want
-          "[&>button]:hidden", // hide default X button
+          "data-[state=open]:animate-none",
+          "[&>button]:hidden",
           zoomedClassName
         )}
       >
@@ -140,11 +116,10 @@ export function ImageZoom({
         {open && (
           <div
             className="relative w-[95vw] h-[95vh] flex items-center justify-center"
-            // close when clicking background or the image itself
             onClick={() => setOpen(false)}
           >
             <Image
-              src={src}
+              src={url}
               alt={alt}
               fill
               sizes="95vw"

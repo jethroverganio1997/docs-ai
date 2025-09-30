@@ -6,25 +6,15 @@ import {
   DropzoneEmptyState,
 } from "@/components/supabase/dropzone";
 import { useSupabaseUpload } from "@/hooks/use-supabase-upload";
-import { useQueryClient } from "@tanstack/react-query";
+import { BUCKET_MEDIA_NAME } from "../_lib/constants";
 
-const MediaUpload = () => {
-  const queryClient = useQueryClient();
-
+export default function MediaUpload() {
   const props = useSupabaseUpload({
-    bucketName: "media",
+    bucketName: BUCKET_MEDIA_NAME,
     path: "",
-    allowedMimeTypes: [
-    'image/jpeg',
-    'image/png',
-    'image/gif',
-    'image/webp'
-  ],
+    allowedMimeTypes: ["image/jpeg", "image/png", "image/gif", "image/webp"],
     maxFiles: 5,
     maxFileSize: 1000 * 1000 * 10, // 10MB,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["media"] });
-    },
   });
 
   return (
@@ -35,6 +25,4 @@ const MediaUpload = () => {
       </Dropzone>
     </div>
   );
-};
-
-export { MediaUpload };
+}
