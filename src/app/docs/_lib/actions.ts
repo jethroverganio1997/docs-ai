@@ -1,12 +1,14 @@
+"use server";
+
 import matter from "gray-matter";
 import { PageTree } from "fumadocs-core/server";
-import { createClient } from "./supabase/server";
+import { createClient } from "../../../lib/supabase/server";
 import { notFound } from "next/navigation";
-import { FilesDocuments } from "../app/files/_lib/types";
-import { Frontmatter } from "../features/search/types";
+import { FilesDocuments } from "../../files/_lib/types";
+import { Frontmatter } from "../../_search/lib/types";
+import { BUCKET_FILE_NAME } from "../../files/_lib/constants";
+import { cookies } from "next/headers";
 
-// Name of your Supabase Storage bucket
-const BUCKET_NAME = "files";
 
 // This is a helper function to get all file paths from your database view.
 // You need a view or table that lists the paths of objects in your bucket.
@@ -33,14 +35,16 @@ async function listAllFilePaths(): Promise<FilesDocuments[]> {
  * @param {string[]} slugs - The slug array identifying the page.
  * @returns {Promise<{ frontmatter: Frontmatter; content: string } | undefined>}
  */
-
-export async function getPage(slugs: string[] = []): Promise<{
+export async function getPage(
+    slugs: string[],
+    cookieStore: ReturnType<typeof cookies>,
+): Promise<{
     frontmatter: Frontmatter;
     content: string;
     directPath: string;
     url: string;
 }> {
-    const supabase = await createClient();
+    const supabase = await createClient(cookieStore);
     const url = "/docs/" + slugs.join("/");
 
     // If there are no slugs, we can't know what page to look for.
@@ -55,7 +59,7 @@ export async function getPage(slugs: string[] = []): Promise<{
     try {
         // 1. Try the direct path (e.g., /mobile/intro.mdx)
         const { data, error } = await supabase.storage
-            .from(BUCKET_NAME)
+            .from(BUCKET_FILE_NAME)
             .download(directPath);
 
         if (!error && data) {

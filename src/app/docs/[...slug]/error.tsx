@@ -1,16 +1,20 @@
 // app/dashboard/error.tsx
-"use client"; // This is a required directive
+"use client";
+import { ErrorState } from "../../../components/error-state";
 
-export default function Error({
-  error,
-}: {
-  error: Error & { digest?: string };
-}) {
+ // This is a required directive
 
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center">
-      <h2 className="text-4xl font-bold mb-4">Error</h2>
-      <p className="text-muted-foreground mb-6">{error.message}</p>
-    </div>
-  );
-}
+export default function DocsError({
+   error,
+ }: {
+   error: Error & { digest?: string };
+ }) {
+   console.log(error.message);
+   return (
+     <ErrorState
+       title="Something went wrong"
+       description={error.message}
+       errorCode="ERR_500"
+     />
+   );
+ }

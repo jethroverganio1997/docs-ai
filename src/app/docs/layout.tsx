@@ -1,21 +1,26 @@
+"use client";
+
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
+import { useQuery } from "@tanstack/react-query";
+import { getPageTree } from "@/app/docs/_lib/actions";
+import { LAYOUT_TREE_TAG } from "./_lib/constants";
+import { PageTree } from "fumadocs-core/server";
 import { baseOptions, linkItems, logo } from "@/app/layout.config";
-import { cache } from "react";
-import { getPageTree } from "../../lib/remote-source";
-import { AISearchTrigger } from "../../features/search/components/ai-search";
+import { AISearchTrigger } from "../_search/components/ai-search";
+import { placeholderTree } from "./layout.config";
 
-const getCachedPageTree = cache(async () => {
-  return await getPageTree();
-});
-
-export default async function Layout({ children }: LayoutProps<"/docs">) {
-  const pageTree = await getCachedPageTree();
+export default function Layout({ children }: { children: React.ReactNode }) {
+  const { data: pageTree } = useQuery<PageTree.Root>({
+    queryKey: [LAYOUT_TREE_TAG],
+    queryFn: getPageTree,
+  });
 
   const base = baseOptions();
 
   return (
     <DocsLayout
-      tree={pageTree}
+      // Use the tree from the store, which is updated by the query
+      tree={pageTree ?? placeholderTree}
       {...base}
       links={linkItems.filter((item) => item.type === "icon")}
       nav={{
@@ -31,7 +36,6 @@ export default async function Layout({ children }: LayoutProps<"/docs">) {
       }}
     >
       {children}
-    
       <AISearchTrigger />
     </DocsLayout>
   );

@@ -42,6 +42,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { FilesDocuments } from "../_lib/types";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { DOCS_SEARCH_TAG } from "../../_search/lib/constants";
+import { LAYOUT_TREE_TAG } from "../../docs/_lib/constants";
 
 interface DocumentTableProps {
   data: FilesDocuments[];
@@ -73,7 +75,8 @@ export function FilesDataTable({ data }: DocumentTableProps) {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["docsSearch"] }); //TODO make constant
+      queryClient.invalidateQueries({ queryKey: [DOCS_SEARCH_TAG] });
+      queryClient.invalidateQueries({ queryKey: [LAYOUT_TREE_TAG] });
     },
   });
 

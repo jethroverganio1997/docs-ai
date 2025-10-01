@@ -2,7 +2,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "../../../lib/supabase/client";
-import { SortedResult, UseDocsSearchOptions, UseDocsSearchResult } from "../../search/types";
+import {
+  SortedResult,
+  UseDocsSearchOptions,
+  UseDocsSearchResult,
+} from "../../_search/lib/types";
+import { DOCS_SEARCH_TAG } from "../../_search/lib/constants";
 
 // --- The Hook Implementation ---
 
@@ -35,7 +40,7 @@ export function useDocsSearch(
   const queryInfo = useQuery({
     // The query key is an array that uniquely identifies this data.
     // When `debouncedSearch` changes, TanStack Query will run the query.
-    queryKey: ["docsSearch", debouncedSearch], // Corrected line
+    queryKey: [DOCS_SEARCH_TAG, debouncedSearch], // Corrected line
 
     // The function that performs the fetch
     queryFn: async () => {

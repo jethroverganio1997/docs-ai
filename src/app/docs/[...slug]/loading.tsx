@@ -1,9 +1,9 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 
-export default async function LoadingPage() {
+export default function DocsLoadingPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className=" xl:max-w-3xl min-h-screen bg-fd-background m-4">
       <div className="flex">
         {/* Main Content */}
         <div className="flex-1 p-6 lg:p-8">
@@ -80,32 +80,6 @@ export default async function LoadingPage() {
               <Skeleton className="h-4 w-1/2" />
             </div>
           </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className="w-64 border-l p-6 hidden lg:block">
-          <div className="mb-4">
-            <Skeleton className="h-5 w-24 mb-3" />
-          </div>
-
-          <div className="space-y-6">
-            {/* Navigation Items */}
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-20" />
-              <Skeleton className="h-4 w-16" />
-              <Skeleton className="h-4 w-14" />
-              <Skeleton className="h-4 w-18" />
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-22" />
-            </div>
-
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-12" />
-              <Skeleton className="h-4 w-16" />
-              <Skeleton className="h-4 w-14" />
-              <Skeleton className="h-4 w-20" />
-            </div>
-          </div>
         </div>
       </div>
     </div>

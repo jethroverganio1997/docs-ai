@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { BUCKET_FILE_NAME, FILES_DOCUMENT_TAG } from "./constants";
 import { FilesDocuments } from "./types";
 import { cookies } from "next/headers";
+import { getFileName } from "../../../lib/helpers";
 
 export async function getFilesDocument(
   cookieStore: ReturnType<typeof cookies>,
@@ -44,6 +45,7 @@ export async function deleteFile(path: string | null): Promise<boolean> {
   if (error) throw error;
 
   revalidateTag(FILES_DOCUMENT_TAG);
-  revalidatePath("/docs"); //TODO
+  revalidateTag(getFileName(path));
+  console.log("delete" + getFileName(path));
   return true;
 }

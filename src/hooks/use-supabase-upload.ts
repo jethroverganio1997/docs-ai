@@ -7,9 +7,18 @@ import {
 import { createClient } from "../lib/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { revalidateTagAction } from "../lib/actions";
-import { BUCKET_MEDIA_NAME, MEDIA_IMAGES_TAG } from "../app/media/_lib/constants";
+import {
+  BUCKET_MEDIA_NAME,
+  MEDIA_IMAGES_TAG,
+} from "../app/media/_lib/constants";
 import { toast } from "sonner";
-import { BUCKET_FILE_NAME, FILES_DOCUMENT_TAG } from "../app/files/_lib/constants";
+import {
+  BUCKET_FILE_NAME,
+  FILES_DOCUMENT_TAG,
+} from "../app/files/_lib/constants";
+import { DOCS_SEARCH_TAG } from "../app/_search/lib/constants";
+import { LAYOUT_TREE_TAG } from "../app/docs/_lib/constants";
+import { getFileName } from "../lib/helpers";
 // import { revalidatePathAction } from "../lib/actions";
 
 const supabase = createClient();
@@ -140,9 +149,13 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
           });
 
         if (error) {
-          return { name: file.name, message: error.message };
+          return {
+            filePath: filePath,
+            name: file.name,
+            message: error.message,
+          };
         } else {
-          return { name: file.name, message: undefined };
+          return { filePath: filePath, name: file.name, message: undefined };
         }
       }),
     );
@@ -161,16 +174,21 @@ const useSupabaseUpload = (options: UseSupabaseUploadOptions) => {
     if (responseSuccesses.length > 0) {
       toast.success("Successfully Uploaded!");
 
-      //refresh search cache
-      queryClient.invalidateQueries({ queryKey: ["docsSearch"] });
-
-      // refresh media images
+      // refresh media
       if (bucketName === BUCKET_MEDIA_NAME) {
         await revalidateTagAction(MEDIA_IMAGES_TAG);
       }
 
-      // refresh media files
+      // refresh files
       if (bucketName === BUCKET_FILE_NAME) {
+        // client clear cache
+        queryClient.invalidateQueries({ queryKey: [DOCS_SEARCH_TAG] });
+        await queryClient.refetchQueries({ queryKey: [LAYOUT_TREE_TAG] });
+
+        // server side clear cache
+        responseSuccesses.map((response) => {
+          revalidateTagAction(getFileName(response.filePath));
+        });
         await revalidateTagAction(FILES_DOCUMENT_TAG);
       }
 

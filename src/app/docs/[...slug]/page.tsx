@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import {
   DocsBody,
   DocsDescription,
@@ -6,55 +5,49 @@ import {
   DocsTitle,
 } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
-import { createCompiler, parseFrontmatter } from "@fumadocs/mdx-remote";
-import { getPage } from "@/lib/remote-source";
+import { getPage } from "@/app/docs/_lib/actions";
 import { getMDXComponents } from "@/components/mdx/mdx-components";
-import { cache } from "react";
-import { rehypeCode, remarkStructure } from "fumadocs-core/mdx-plugins";
+import { cookies } from "next/headers";
+import { unstable_cache as cacheTag } from "next/cache";
+import { DOCS_PAGE_KEY, DOCS_PAGE_TAG } from "../_lib/constants";
+import { remarkStructure } from "fumadocs-core/mdx-plugins";
+import { createCompiler } from "@fumadocs/mdx-remote";
 
 const compiler = createCompiler({
   remarkPlugins: [remarkStructure],
-  rehypePlugins: [rehypeCode],
-});
-
-const getCachePage = cache(async (slug: string[] | undefined) => {
-  return await getPage(slug);
 });
 
 export default async function Page(props: PageProps<"/docs/[...slug]">) {
   const params = await props.params;
-  const cache = await getPage(params.slug);
-  if (!cache) notFound();
+  const cookieStore = cookies();
+
+  const getDocument = cacheTag(
+    async () => {
+      return await getPage(params.slug!, cookieStore);
+    },
+    [DOCS_PAGE_KEY, ...params.slug],
+    {
+      tags: [DOCS_PAGE_TAG, ...params.slug],
+    }
+  );
+
+  const document = await getDocument();
+  if (!document) notFound();
 
   const compiled = await compiler.compile({
-    filePath: cache.directPath,
-    source: cache.content,
+    filePath: document.directPath,
+    source: document.content,
   });
 
   const MdxContent = compiled.body;
 
   return (
     <DocsPage toc={compiled.toc}>
-      <DocsTitle>{cache.frontmatter.title}</DocsTitle>
-      <DocsDescription>{cache.frontmatter.description}</DocsDescription>
+      <DocsTitle>{document.frontmatter.title}</DocsTitle>
+      <DocsDescription>{document.frontmatter.description}</DocsDescription>
       <DocsBody>
         <MdxContent components={getMDXComponents()} />
       </DocsBody>
     </DocsPage>
   );
-}
-
-export async function generateMetadata(props: {
-  params: Promise<{ slug?: string[] }>;
-}) {
-  const params = await props.params;
-  const cache = await getCachePage(params.slug);
-  if (!cache) notFound();
-
-  const { frontmatter } = parseFrontmatter(cache.content);
-
-  return {
-    title: frontmatter.title,
-    description: frontmatter.description,
-  } satisfies Metadata;
 }
