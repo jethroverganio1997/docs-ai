@@ -8,6 +8,9 @@ import { FilesDocuments } from "../../files/_lib/types";
 import { Frontmatter } from "../../_search/lib/types";
 import { BUCKET_FILE_NAME } from "../../files/_lib/constants";
 import { cookies } from "next/headers";
+// import { Folder as LFolder } from "lucide-react";
+// import React from "react";
+import { formatName, getFilePath } from "../../../lib/helpers";
 
 // This is a helper function to get all file paths from your database view.
 // You need a view or table that lists the paths of objects in your bucket.
@@ -83,7 +86,6 @@ export async function getPage(
 export async function getPageTree(): Promise<PageTree.Root> {
     const allPaths = await listAllFilePaths();
 
-    // 1. (Optional but recommended) Sort initial paths for consistency
     allPaths.sort((a, b) =>
         a.storage_object_path!.localeCompare(b.storage_object_path!)
     );
@@ -95,8 +97,7 @@ export async function getPageTree(): Promise<PageTree.Root> {
 
     for (const fullPath of allPaths) {
         if (
-            !fullPath.storage_object_path ||
-            !fullPath.storage_object_path.endsWith(".mdx")
+            !fullPath.storage_object_path
         ) {
             continue;
         }
@@ -108,18 +109,23 @@ export async function getPageTree(): Promise<PageTree.Root> {
         let currentNode: PageTree.Folder | PageTree.Root = root;
 
         for (const part of dirParts) {
+            const formattedPartName = formatName(part);
             let folderNode: PageTree.Folder | undefined = currentNode.children
                 .find(
                     (node): node is PageTree.Folder =>
-                        node.type === "folder" && node.name === part,
+                        node.type === "folder" &&
+                        node.name === formattedPartName,
                 );
 
             if (!folderNode) {
                 folderNode = {
                     type: "folder",
-                    name: part,
+                    name: formattedPartName,
                     defaultOpen: true,
+                    // icon: React.createElement(LFolder),
                     children: [],
+                    // This flags top-level folders
+                    // root: currentNode === root,
                 };
                 currentNode.children.push(folderNode);
             }
@@ -127,21 +133,13 @@ export async function getPageTree(): Promise<PageTree.Root> {
             currentNode = folderNode;
         }
 
-        const url = "/docs/" +
-            fullPath.storage_object_path.replace(/\.mdx?$/, "");
         const pageNode: PageTree.Item = {
             type: "page",
-            name: fileName.replace(/\.mdx?$/, ""),
-            url,
+            name: formatName(fileName),
+            url: getFilePath(fullPath.storage_object_path),
         };
 
-        if (fileName.startsWith("index.")) {
-            if ("type" in currentNode && currentNode.type === "folder") {
-                currentNode.index = pageNode;
-            }
-        } else {
-            currentNode.children.push(pageNode);
-        }
+        currentNode.children.push(pageNode);
     }
 
     // 2. Sort the completed tree structure just before returning
@@ -162,8 +160,12 @@ function sortTree(node: PageTree.Root | PageTree.Folder): void {
         const bName = String(b.name).toLowerCase();
 
         // Rule 1: "introduction" always comes first (case-insensitive).
-        if (aName === "introduction" && bName !== "introduction") return -1;
-        if (bName === "introduction" && aName !== "introduction") return 1;
+        if (aName === "getting-started" && bName !== "getting-started") {
+            return -1;
+        }
+        if (bName === "getting-started" && aName !== "getting-started") {
+            return 1;
+        }
 
         // Rule 2: Folders are listed before pages.
         if (a.type === "folder" && b.type === "page") return -1;
