@@ -51,7 +51,6 @@ export default async function Page(props: PageProps<"/docs/[...slug]">) {
           <MdxContent components={getMDXComponents()} />
         </DocsBody>
       </DocsPage>
-      <DocsLoadingPage />
     </div>
   );
 }
