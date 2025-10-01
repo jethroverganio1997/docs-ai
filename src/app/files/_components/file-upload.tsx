@@ -15,7 +15,7 @@ export default function FileUpload() {
     allowedMimeTypes: ["text/mdx"],
     maxFiles: 1,
     maxFileSize: 1000 * 1000 * 10, // 10MB,
-    upsert: true,
+    upsert: false,
   });
 
   return (

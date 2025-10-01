@@ -20,6 +20,7 @@ import { cn } from "fumadocs-ui/utils/cn";
 import Link from "next/link";
 import { getFileName } from "../../../lib/helpers";
 import { createClient } from "../../../lib/supabase/client";
+import { Skeleton } from "../../../components/ui/skeleton";
 
 // Define the shape of your custom metadata
 type MessageMetadata = {
@@ -242,14 +243,22 @@ function Message({
   ...props
 }: { message: CustomUIMessage } & ComponentProps<"div">) {
   const { setOpen } = useAIContext();
+  const { status, messages } = useChatContext();
   let markdown = "";
 
   for (const part of message.parts ?? []) {
     if (part.type === "text") {
       markdown += part.text;
-      console.log(part.text);
-      continue;
     }
+  }
+
+  if (
+    message.role === "assistant" &&
+    markdown.length === 0 &&
+    (status == "streaming" || status == "submitted") &&
+    messages.at(-1)?.id === message.id
+  ) {
+    return <AssistantLoading />;
   }
 
   return (
@@ -257,7 +266,7 @@ function Message({
       <p
         className={cn(
           "mb-1 text-sm font-medium text-fd-muted-foreground",
-          message.role === "assistant" && "text-fd-primary"
+          message.role === "assistant" && "text-gradient"
         )}
       >
         {roleName[message.role] ?? "unknown"}
@@ -286,8 +295,22 @@ function Message({
   );
 }
 
+function AssistantLoading() {
+  return (
+    <div>
+      <p className="mb-2 text-sm font-medium text-gradient">
+        {roleName.assistant}
+      </p>
+      <div className="prose text-sm">
+        <Skeleton className="w-24 h-5 rounded-sm" />
+      </div>
+    </div>
+  );
+}
+
 export function AISearchTrigger() {
   const [open, setOpen] = useState(false);
+
   //the headers are on onSendMessage
   const chat = useChat<CustomUIMessage>({
     id: "search",
@@ -295,6 +318,11 @@ export function AISearchTrigger() {
       api: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/chat`,
     }),
   });
+
+  // NEW: Check if the last message is from the user while loading
+  const isWaitingForResponse =
+    chat.status === "submitted" &&
+    chat.messages[chat.messages.length - 1]?.role === "user";
 
   const onKeyPress = (e: KeyboardEvent) => {
     if (e.key === "Escape" && open) {
@@ -364,6 +392,7 @@ export function AISearchTrigger() {
                   .map((item) => (
                     <Message key={item.id} message={item} />
                   ))}
+                {isWaitingForResponse && <AssistantLoading />}
               </div>
             </List>
           </div>
