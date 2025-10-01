@@ -9,7 +9,6 @@ import { Frontmatter } from "../../_search/lib/types";
 import { BUCKET_FILE_NAME } from "../../files/_lib/constants";
 import { cookies } from "next/headers";
 
-
 // This is a helper function to get all file paths from your database view.
 // You need a view or table that lists the paths of objects in your bucket.
 async function listAllFilePaths(): Promise<FilesDocuments[]> {
@@ -119,6 +118,7 @@ export async function getPageTree(): Promise<PageTree.Root> {
                 folderNode = {
                     type: "folder",
                     name: part,
+                    defaultOpen: true,
                     children: [],
                 };
                 currentNode.children.push(folderNode);

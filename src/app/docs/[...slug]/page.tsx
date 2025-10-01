@@ -1,9 +1,10 @@
 import {
-  DocsBody,
   DocsDescription,
   DocsPage,
   DocsTitle,
+  DocsBody,
 } from "fumadocs-ui/page";
+// import { DocsBody } from "../_components/docs-page";
 import { notFound } from "next/navigation";
 import { getPage } from "@/app/docs/_lib/actions";
 import { getMDXComponents } from "@/components/mdx/mdx-components";
@@ -12,10 +13,15 @@ import { unstable_cache as cacheTag } from "next/cache";
 import { DOCS_PAGE_KEY, DOCS_PAGE_TAG } from "../_lib/constants";
 import { remarkStructure } from "fumadocs-core/mdx-plugins";
 import { createCompiler } from "@fumadocs/mdx-remote";
-import DocsLoadingPage from "./loading";
 
 const compiler = createCompiler({
   remarkPlugins: [remarkStructure],
+  rehypeCodeOptions: {
+    themes: {
+      light: "slack-ochin",
+      dark: "catppuccin-mocha",
+    },
+  },
 });
 
 export default async function Page(props: PageProps<"/docs/[...slug]">) {
@@ -43,14 +49,21 @@ export default async function Page(props: PageProps<"/docs/[...slug]">) {
   const MdxContent = compiled.body;
 
   return (
-    <div>
-      <DocsPage toc={compiled.toc}>
-        <DocsTitle>{document.frontmatter.title}</DocsTitle>
-        <DocsDescription>{document.frontmatter.description}</DocsDescription>
-        <DocsBody>
-          <MdxContent components={getMDXComponents()} />
-        </DocsBody>
-      </DocsPage>
-    </div>
+    <DocsPage
+      article={{
+        style: {
+          backgroundColor: "var(--color-fd-background)",
+          boxShadow: "none",
+          border: "none",
+        },
+      }}
+      toc={compiled.toc}
+    >
+      <DocsTitle>{document.frontmatter.title}</DocsTitle>
+      <DocsDescription>{document.frontmatter.description}</DocsDescription>
+      <DocsBody>
+        <MdxContent components={getMDXComponents()} />
+      </DocsBody>
+    </DocsPage>
   );
 }
