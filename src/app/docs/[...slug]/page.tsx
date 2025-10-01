@@ -12,6 +12,7 @@ import { unstable_cache as cacheTag } from "next/cache";
 import { DOCS_PAGE_KEY, DOCS_PAGE_TAG } from "../_lib/constants";
 import { remarkStructure } from "fumadocs-core/mdx-plugins";
 import { createCompiler } from "@fumadocs/mdx-remote";
+import DocsLoadingPage from "./loading";
 
 const compiler = createCompiler({
   remarkPlugins: [remarkStructure],
@@ -42,12 +43,15 @@ export default async function Page(props: PageProps<"/docs/[...slug]">) {
   const MdxContent = compiled.body;
 
   return (
-    <DocsPage toc={compiled.toc}>
-      <DocsTitle>{document.frontmatter.title}</DocsTitle>
-      <DocsDescription>{document.frontmatter.description}</DocsDescription>
-      <DocsBody>
-        <MdxContent components={getMDXComponents()} />
-      </DocsBody>
-    </DocsPage>
+    <div>
+      <DocsPage toc={compiled.toc}>
+        <DocsTitle>{document.frontmatter.title}</DocsTitle>
+        <DocsDescription>{document.frontmatter.description}</DocsDescription>
+        <DocsBody>
+          <MdxContent components={getMDXComponents()} />
+        </DocsBody>
+      </DocsPage>
+      <DocsLoadingPage />
+    </div>
   );
 }

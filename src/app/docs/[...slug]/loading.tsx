@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 
 export default function DocsLoadingPage() {
   return (
-    <div className=" xl:max-w-3xl min-h-screen bg-fd-background m-4">
+    <div className=" xl:max-w-[840px] min-h-screen bg-fd-background m-4">
       <div className="flex">
         {/* Main Content */}
         <div className="flex-1 p-6 lg:p-8">
