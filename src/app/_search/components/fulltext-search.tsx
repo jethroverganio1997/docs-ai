@@ -35,7 +35,11 @@ export default function SupabaseSearchDialog(props: SharedProps) {
           <SearchDialogClose />
         </SearchDialogHeader>
         <SearchDialogList
-          items={query.data !== "empty" ? query.data : null}
+          items={
+            query.data !== "empty"
+              ? [...(Array.isArray(query.data) ? query.data : [])]
+              : []
+          }
           Item={(props) => (
             <SearchDialogListItem
               {...props}

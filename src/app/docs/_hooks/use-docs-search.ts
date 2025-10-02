@@ -3,11 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "../../../lib/supabase/client";
 import {
-  SortedResult,
   UseDocsSearchOptions,
   UseDocsSearchResult,
 } from "../../_search/lib/types";
 import { DOCS_SEARCH_TAG } from "../../_search/lib/constants";
+import { type SortedResult } from "fumadocs-core/search";
 
 // --- The Hook Implementation ---
 

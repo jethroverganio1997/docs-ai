@@ -7,27 +7,13 @@
 //   rank: number;
 // };
 
+import { SortedResult } from "fumadocs-core/search";
+
 export interface Frontmatter {
     title: string;
     description?: string;
 }
 
-
-export type HighlightedText = {
-  type: "text";
-  content: string;
-  styles?: {
-    highlight?: boolean;
-  };
-};
-
-export type SortedResult = {
-  id: string;
-  url: string;
-  type: "page" | "heading" | "text";
-  content: string;
-  contentWithHighlights?: HighlightedText[];
-};
 
 export interface FetchOptions {
   api?: string;

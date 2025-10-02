@@ -12,6 +12,7 @@ export function parseHighlights(highlightedString: string): HighlightedText[] {
   const parts = highlightedString.split(/<mark>|<\/mark>/g);
   const result: HighlightedText[] = [];
 
+
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i];
     if (part) {

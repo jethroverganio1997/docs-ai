@@ -15,6 +15,7 @@ type SearchResult = {
   url: string;
   type: "page" | "heading" | "text";
   content: string;
+  breadcrumbs?: string[];
   contentWithHighlights: string;
   rank: number;
 };
@@ -104,7 +105,6 @@ Deno.serve(async (req) => {
         search_term: query,
       },
     );
-    console.log(data);
 
     if (error) {
       console.error("Supabase search error:", error);
@@ -128,6 +128,12 @@ Deno.serve(async (req) => {
       url: item.url,
       type: item.type,
       content: item.content,
+      breadcrumbs: item.url
+        .split("/") // make into list
+        .slice(2) // remove first 2 index "/" and "docs/"
+        .map((p, i, arr) =>
+          i === arr.length - 1 && p.includes("#") ? p.split("#")[0] : p
+        ), // check if '#' remove last item with that
       contentWithHighlights: parseHighlights(item.contentWithHighlights),
     }));
 
