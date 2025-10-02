@@ -77,7 +77,7 @@
   --color-fd-card: hsl(0, 0%, 94.7%);
   --color-fd-card-foreground: hsl(0, 0%, 3.9%);
   --color-fd-border: hsla(0, 0%, 80%, 50%);
-  --color-fd-primary: hsl(0, 0%, 9%);
+  --color-fd-primary: oklch(0.6 0.2 340);
   --color-fd-primary-foreground: hsl(0, 0%, 98%);
   --color-fd-secondary: hsl(0, 0%, 93.1%);
   --color-fd-secondary-foreground: hsl(0, 0%, 9%);
@@ -129,7 +129,7 @@
   --color-fd-card: hsl(0, 0%, 9.8%);
   --color-fd-card-foreground: hsl(0, 0%, 98%);
   --color-fd-border: hsla(0, 0%, 40%, 20%);
-  --color-fd-primary: hsl(0, 0%, 98%);
+  --color-fd-primary: oklch(55.533% 0.12303 337.91);
   --color-fd-primary-foreground: hsl(0, 0%, 9%);
   --color-fd-secondary: hsl(0, 0%, 12.9%);
   --color-fd-secondary-foreground: hsl(0, 0%, 92%);
