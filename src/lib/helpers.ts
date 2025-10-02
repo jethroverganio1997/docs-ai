@@ -1,6 +1,6 @@
 export function getFileName(path: string) {
   const fileName = path.split("/").at(-1) ?? "";
-  return fileName.replace(/\.mdx$/, ""); // remove only ".mdx"
+  return fileName.replace(/\.[^/.]+$/, "");
 }
 
 export function getFilePath(path: string) {
@@ -55,4 +55,23 @@ export function formatDateWithTime(
 // YYYY-MM-DD
 export function formatDateToYearMonthDay(dateInput: string | undefined) {
   return dateInput ? new Date(dateInput).toISOString().split("T")[0] : "";
+}
+
+export function formatName(name: string): string {
+  // Replace dashes with spaces
+  const spacedName = name.replace(/-/g, " ");
+
+  // Remove any extension at the end (e.g. .mdx, .ts, .js, .json, etc.)
+  const withoutExt = spacedName.replace(/\.[^/.]+$/, "");
+
+  // Split into words
+  const words = withoutExt.split(" ");
+
+  if (words.length === 0) return "";
+
+  // Capitalize only the first word, rest lowercase
+  const formatted = words[0].charAt(0).toUpperCase() +
+    words[0].slice(1).toLowerCase();
+
+  return [formatted, ...words.slice(1).map((w) => w.toLowerCase())].join(" ");
 }
