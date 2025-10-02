@@ -171,7 +171,11 @@ CREATE OR REPLACE FUNCTION search_documents(search_term TEXT) RETURNS TABLE (
     -- Use quotes to preserve camelCase
     rank REAL
   ) LANGUAGE plpgsql AS $$
-DECLARE query TSQUERY := websearch_to_tsquery('english', search_term);
+DECLARE 
+  -- Replace spaces with ' & ' and append ':*' to the last word for prefix matching
+  -- e.g., 'hello world' becomes 'hello' & 'world:*'
+  formatted_search_term TEXT := regexp_replace(trim(search_term), '\s+', ' & ', 'g') || ':*';
+  query TSQUERY := to_tsquery('english', formatted_search_term);
 BEGIN RETURN QUERY -- Use a subquery to combine and then order the final results
 SELECT *
 FROM (

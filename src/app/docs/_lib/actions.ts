@@ -47,7 +47,7 @@ export async function getPage(
     url: string;
 }> {
     const supabase = await createClient(cookieStore);
-    const url = "/docs/" + slugs.join("/");
+    const url = getFilePath(slugs.join("/"));
 
     // If there are no slugs, we can't know what page to look for.
     if (!slugs || slugs.length === 0) {
@@ -121,7 +121,7 @@ export async function getPageTree(): Promise<PageTree.Root> {
                 folderNode = {
                     type: "folder",
                     name: formattedPartName,
-                    defaultOpen: true,
+                    defaultOpen: currentNode === root,
                     // icon: React.createElement(LFolder),
                     children: [],
                     // This flags top-level folders
