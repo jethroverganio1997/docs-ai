@@ -1,0 +1,4 @@
+# nixpacks.toml
+
+[phases.install]
+cmds = ["npm install --save --legacy-peer-deps"]

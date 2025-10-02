@@ -11,11 +11,11 @@ import { getMDXComponents } from "@/components/mdx/mdx-components";
 import { cookies } from "next/headers";
 import { unstable_cache as cacheTag } from "next/cache";
 import { DOCS_PAGE_KEY, DOCS_PAGE_TAG } from "../_lib/constants";
-import { remarkStructure } from "fumadocs-core/mdx-plugins";
+import { remarkMdxFiles, remarkStructure } from "fumadocs-core/mdx-plugins";
 import { createCompiler } from "@fumadocs/mdx-remote";
 
 const compiler = createCompiler({
-  remarkPlugins: [remarkStructure],
+  remarkPlugins: [remarkStructure, remarkMdxFiles],
   rehypeCodeOptions: {
     themes: {
       light: "slack-ochin",
@@ -35,6 +35,7 @@ export default async function Page(props: PageProps<"/docs/[...slug]">) {
     [DOCS_PAGE_KEY, ...params.slug],
     {
       tags: [DOCS_PAGE_TAG, ...params.slug],
+      revalidate: 60 * 60 * 24, // 24 hours (in seconds)
     }
   );
 

@@ -1,4 +1,5 @@
 import defaultMdxComponents from "fumadocs-ui/mdx";
+// import * as FilesComponents from "fumadocs-ui/components/files";
 import type { MDXComponents } from "mdx/types";
 import { createGenerator } from "fumadocs-typescript";
 import { AutoTypeTable } from "fumadocs-typescript/ui";
@@ -9,6 +10,7 @@ const generator = createGenerator();
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultMdxComponents,
+    // ...FilesComponents,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     img: (props) => <ImageZoom {...(props as any)} />,
     AutoTypeTable: (props) => (

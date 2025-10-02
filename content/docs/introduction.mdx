@@ -14,7 +14,7 @@ When creating documentation pages, each `.mdx` file should follow a clear struct
 
 ---
 
-## 1. Frontmatter
+## 📝 1. Frontmatter
 
 At the top of every file, include YAML frontmatter to describe the page.  
 This helps organize docs, generate navigation, and apply metadata.
@@ -28,19 +28,25 @@ tags:
   - docs
   - tutorial
 ---
-```
 
-## 2. File Naming and Format
+## 📂 2. File Naming and Format
 
-- Every documentation file **must end with `.mdx`**.  
-  Example: `mobile.sample.mdx`, `mobile.getting-started.mdx`
+- 📌 Every documentation file must end with .mdx.
+Example: mobile.sample.mdx, mobile.getting-started.mdx
 
-- First word seperated by dot should be **mobile, frontend, backend, api or server**
+- 🏷️ The first word (before the dot) should be one of:
+mobile, frontend, backend, api, or server.
 
-- The content inside an MDX file **follows standard Markdown syntax**, which means you can use:
+## ✍️ 3. Content Rules
 
-  - Headings (`#`, `##`, `###`)
-  - Lists (`-` or `1.`)
-  - Links (`[text](url)`)
-  - Images (`![alt](url)`)
-  - Additionally, you can include React components directly in your Markdown, making MDX powerful for interactive documentation.
+The content inside an MDX file follows standard Markdown syntax, which means you can use:
+
+- 🔠 Headings (#, ##, ###)
+
+- 📋 Lists (- or 1.)
+
+- 🔗 Links ([text](url))
+
+- 🖼️ Images (![alt](url))
+
+- ⚛️ React components — You can embed interactive components directly in your docs, making MDX more powerful than plain Markdown.

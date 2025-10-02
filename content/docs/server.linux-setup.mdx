@@ -1,0 +1,145 @@
+---
+title: "Secure Linux VPS Setup"
+description: "Step-by-step guide to secure and configure your Linux server on first boot."
+---
+
+## 🚀 1. Connect to your VPS
+
+Most providers (like Contabo, DigitalOcean, etc.) give you a root password on first boot. Connect like this:
+
+```bash
+ssh root@your_server_ip
+```
+
+## 🔑 2. Update your system
+
+Always update packages first thing:
+
+```bash
+# Ubuntu/Debian
+apt update && apt upgrade -y
+```
+
+## 👤 3. Create a new user (don’t use root for daily work)
+
+adduser myuser
+
+```bash
+# 1. Create the user
+sudo adduser myuser
+
+# 2. Add the user to the sudo group
+sudo usermod -aG sudo myuser
+
+# 3. switch to that user
+su - jet
+
+# 4. to login
+ssh myuser@your_server_ip
+```
+
+## 🔐 4. Setup SSH access
+
+On your local machine check if you already have generated ssh key.
+
+```powershell
+cat ~/.ssh/id_ed25519.pub
+```
+
+Generate ssh key if you dont have one, copy all the result.
+(press enter to accept defaults)
+
+```powershell
+ssh-keygen -t ed25519
+```
+
+Add your ssh key to the server
+make the .ssh folder for myuser
+
+```bash
+sudo mkdir -p /home/myuser/.ssh
+sudo nano /home/myuser/.ssh/authorized_keys
+
+```
+
+to save then exit
+`CTRL + O`
+`ENTER`
+`CTRL + X`
+
+Now you can log in as myuser directly:
+
+```powershell
+ssh myuser@your_server_ip
+```
+
+### Harden SSH config
+
+<Callout type="warning">
+  Be careful when configuring UFW rules for SSH and IP access — a mistake can
+  lock you out of your server. Always test logging in with your SSH key in a
+  **separate terminal session** before closing your current one.
+</Callout>
+
+Edit SSH config:
+
+```bash
+sudo nano /etc/ssh/sshd_config
+```
+
+Change/add:
+
+```nginx
+PermitRootLogin no
+PasswordAuthentication no
+```
+
+(This means: no root login, only key-based auth)
+
+Restart SSH:
+
+```bash
+sudo systemctl restart ssh
+```
+
+## 🌐 5. Restrict SSH to your IP only
+
+Using UFW (Ubuntu/Debian default)
+
+```bash
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+# Allow SSH only from your IP
+sudo ufw allow from YOUR_IP_ADDRESS to any port 22
+
+# Allow HTTP/HTTPS only from your IP (Whitelisting)
+sudo ufw allow from YOUR_IP_ADDRESS to any port 80
+sudo ufw allow from YOUR_IP_ADDRESS to any port 443
+
+sudo ufw enable
+sudo ufw status
+```
+
+Allow all setup
+
+```bash
+# If you want to HTTP/HTTPS
+sudo ufw allow 80
+sudo ufw allow 443
+```
+
+To delete rules
+
+```bash
+sudo ufw status numbered
+sudo ufw delete <number>
+```
+
+✅ After this:
+
+- Only your IP can SSH in
+
+- SSH is key-only (no passwords, no root login)
+
+- Firewall is configured and active only your IP can connect to SSH , HTTPS and HTTP
