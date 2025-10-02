@@ -1,4 +1,5 @@
-# nixpacks.toml
+[phases.setup]
+nixPkgs = ["pkgs.nodejs-22_x", "pkgs.npm-11_x"]
 
 [phases.install]
 cmds = ["npm install --save --legacy-peer-deps"]
