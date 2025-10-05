@@ -1,0 +1,159 @@
+---
+title: "Open WebUI Installation & Deployment Guide"
+description: "Open WebUI is a self-hosted, browser-based UI for managing and interacting with LLMs (like **Ollama**).
+This guide covers installation and deployment methods, including **Docker Compose with Traefik in Dokploy**."
+---
+
+## 📋 Prerequisites
+
+* 🖥️ A Linux machine (Ubuntu/Debian recommended)
+* 🔑 `sudo` access
+* 🌐 Internet connection
+* 🐳 Docker + Docker Compose installed
+* ⚡ (Optional) **Ollama** installed and running (`http://localhost:11434`)
+
+---
+
+## 🛠️ Installation Methods
+
+### 1. 📦 Install via Docker (Simple)
+
+```bash
+# Pull the latest Open WebUI image
+docker pull ghcr.io/open-webui/open-webui:main
+
+# Run container
+docker run -d \
+  --name open-webui \
+  -p 3000:8080 \
+  -v open-webui-data:/app/backend/data \
+  ghcr.io/open-webui/open-webui:main
+```
+
+👉 Access WebUI at:
+**[http://localhost:3000](http://localhost:3000)**
+
+---
+
+### 2. 🐙 Deploy with Docker Compose + Traefik in Dokploy (Recommended for Production)
+
+Create a `docker-compose.yml` file:
+
+```yaml
+# This is the main service for the Open WebUI interface.
+services: 
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      # Access the Web UI on port 8080 of your host machine
+      - "8080:8080"
+    environment:
+      # Tell WebUI where to find the Ollama API
+      - "OLLAMA_BASE_URL=http://172.17.0.1:11434"
+      - "WEBUI_SECRET_KEY=${webui_secret_key}"
+    volumes:
+      # Create a named volume to persist WebUI data
+      - open-webui:/app/backend/data
+    extra_hosts:
+      # Ensures the container can reach services running on the host
+      - "host.docker.internal:host-gateway"
+    # Add these labels for Traefik configuration
+    labels:
+      - "traefik.enable=true"
+
+      # 1. Router for HTTPS traffic (websecure)
+      - "traefik.http.routers.open-webui-secure.entrypoints=websecure"
+      - "traefik.http.routers.open-webui-secure.rule=Host(`feeremit-openwebui-14bb21-5-104-83-167.traefik.me`)" 
+      - "traefik.http.routers.open-webui-secure.service=open-webui"
+      - "traefik.http.routers.open-webui-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.open-webui-secure.middlewares=ip-whitelist@file"
+
+      # 2. Router for HTTP traffic (web)
+      - "traefik.http.routers.open-webui-http.entrypoints=web"
+      - "traefik.http.routers.open-webui-http.rule=Host(`feeremit-openwebui-14bb21-5-104-83-167.traefik.me`)" 
+      - "traefik.http.routers.open-webui-http.service=open-webui"
+      - "traefik.http.routers.open-webui-http.middlewares=ip-whitelist@file,redirect-to-https@file"
+
+      # Define the service that the routers point to
+      - "traefik.http.services.open-webui.loadbalancer.server.port=8080"
+    networks:
+      # Make sure the container is on the same network as Traefik
+      - dokploy-network
+
+volumes:
+  open-webui: {}
+
+networks:
+  dokploy-network:
+    external: true
+```
+
+👉 Deploy it:
+
+```bash
+docker compose up -d
+```
+
+Open in browser:
+**[https://feeremit-openwebui-14bb21-5-104-83-167.traefik.me](https://feeremit-openwebui-14bb21-5-104-83-167.traefik.me)**
+
+---
+
+## 🔗 Connecting to Ollama
+
+If Ollama is running on your host machine (`http://localhost:11434`), set:
+
+```yaml
+environment:
+  - "OLLAMA_BASE_URL=http://172.17.0.1:11434"
+```
+
+---
+
+## 🔒 Firewall & Security
+
+By default, **UFW** may block Docker container communication.
+Allow Docker networks so Open WebUI can reach your LLM:
+
+```bash
+sudo ufw allow from 172.22.0.0/16
+sudo ufw allow from 172.17.0.0/16
+```
+
+---
+
+## 🧰 Open WebUI Troubleshooting
+
+### ❌ The Problem
+
+Open WebUI cannot connect to the LLM (Ollama) on your Linux machine because **UFW** blocks connections from Docker networks.
+
+### ✅ The Solution
+
+Add exceptions for Docker networks:
+
+```bash
+sudo ufw allow from 172.22.0.0/16
+sudo ufw allow from 172.17.0.0/16
+```
+
+This ensures Open WebUI can talk to Ollama while keeping your server protected.
+
+---
+
+## 🧹 Uninstall
+
+To remove Open WebUI:
+
+```bash
+docker rm -f open-webui
+docker volume rm open-webui
+```
+
+---
+
+⚡ That’s it — Open WebUI should now be deployed with **Traefik + Dokploy**, secured with HTTPS, and connected to your LLM!
+
+---

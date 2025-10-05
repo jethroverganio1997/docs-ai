@@ -1,0 +1,163 @@
+---
+title: "UFW (Uncomplicated Firewall) Documentation"
+description: "This document outlines the firewall rules and related commands used to secure Docker containers, Ollama service, and Open WebUI with UFW on Linux"
+---
+
+
+## 🔹 Basics
+
+### ⚡ Enable / Disable Firewall
+```bash
+sudo ufw enable    # Enable UFW
+sudo ufw disable   # Disable UFW
+````
+
+### 📊 Check Status
+
+```bash
+sudo ufw status           # Simple status
+sudo ufw status verbose   # Detailed status
+```
+
+### 📝 Default Policies
+
+```bash
+sudo ufw default deny incoming   # Deny all incoming connections by default
+sudo ufw default allow outgoing  # Allow all outgoing connections by default
+```
+
+---
+
+## 🔹 Allow / Deny Rules
+
+### ✅ Allow Connection
+
+```bash
+sudo ufw default allow incoming/outgoing/routed
+sudo ufw allow 22/tcp       # Allow SSH (port 22)
+sudo ufw allow 80           # Allow HTTP (port 80)
+sudo ufw allow 443/tcp      # Allow HTTPS (port 443)
+sudo ufw allow from IP-ADDRESS   # Allow only from a specific IP to any port
+```
+
+### ❌ Deny Connection
+
+```bash
+sudo ufw default deny incoming/outgoing/routed
+sudo ufw deny 23/tcp        # Deny Telnet (port 23)
+sudo ufw deny from 10.0.0.0/8   # Deny entire subnet
+```
+
+### 🗑️ Delete Rule
+
+```bash
+sudo ufw delete allow 80     # Remove HTTP allow rule
+sudo ufw delete deny 23/tcp  # Remove Telnet deny rule
+```
+
+```bash
+sudo ufw status numbered     # Show rules with numbers
+sudo ufw delete 1  # delete base on ufw number
+```
+
+---
+
+## 🔹 Port and Protocol Specific Rules
+
+```bash
+sudo ufw allow 22/tcp       # TCP only
+sudo ufw allow 53/udp       # UDP only
+sudo ufw allow 8080:8090/tcp  # Allow a port range
+```
+
+---
+
+## 🔹 🌐 IP Whitelisting
+
+```bash
+sudo ufw allow from IP-ADDRESS        # Single IP to any port
+sudo ufw allow from IP-ADDRESS/24     # Subnet
+sudo ufw allow from IP-ADDRESS to any port 443 # Single IP to specific port
+```
+
+---
+
+## 🔹 ♻️ Resetting UFW
+
+```bash
+sudo ufw reset   # Reset all rules to default
+```
+
+---
+
+**💡 Tips:**
+
+* Always set `deny incoming` first before enabling UFW.
+* Use `allow` rules for necessary services like SSH, HTTP, HTTPS.
+* Use IP whitelisting for admin access to enhance security.
+
+## 🔹 🔧 Some of usage
+
+### 🖧 1. Allow Docker Network Traffic
+
+These rules allow traffic from Docker internal networks to pass through the firewall.
+
+```bash
+sudo ufw allow from 172.17.0.0/16
+# 🐳 Allows traffic from the default docker0 bridge network
+
+sudo ufw allow from 172.22.0.0/16
+# 🛠 Allows traffic from a custom Docker bridge network (br-0fe9f4aeec5a)
+
+sudo ufw allow from 172.23.0.0/16
+# 🛠 Allows traffic from another Docker bridge network
+````
+
+**Tip:** These rules ensure that Docker containers can communicate with each other and with the host.
+
+---
+
+### 🌐 2. Allow Specific External IPs
+
+These rules allow specific public IP addresses to access certain ports on your host.
+
+```bash
+sudo ufw allow from IP-ADDRESS to any port 22
+sudo ufw allow from IP-ADDRESS to any port 80
+sudo ufw allow from IP-ADDRESS to any port 443
+# Allows SSH, HTTP, and HTTPS from IP 
+
+```
+
+---
+
+### 🔑 3. Allow Ollama Service API Access
+
+The Ollama service exposes a REST API on port `11434`. These rules allow access from Docker networks and specific IPs.
+
+```bash
+sudo ufw allow from 172.17.0.0/16 to any port 11434
+# Allow Docker containers on the default bridge network to access Ollama API
+
+sudo ufw allow from 172.17.0.1 to any port 11434
+# Allow host machine access to Ollama API
+
+sudo ufw allow from IP-ADDRESS to any port 11434
+# Allow a specific external IP to access Ollama API
+```
+
+---
+
+### ⚙️ 4. UFW General Commands
+
+```bash
+sudo ufw reload
+# Reloads UFW rules after adding new rules
+
+sudo nano /etc/default/ufw
+# Edit UFW default configuration (e.g., DEFAULT_FORWARD_POLICY)
+# Set DEFAULT_FORWARD_POLICY="ACCEPT" to allow Docker traffic forwarding
+
+sudo systemctl restart docker
+# Restart Docker to apply changes after UFW modifications
+```

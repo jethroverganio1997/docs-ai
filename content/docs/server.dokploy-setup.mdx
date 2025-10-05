@@ -1,0 +1,28 @@
+---
+title: "Dokploy Installation & Setup Guide"
+description: "Easily install Dokploy on your Linux server, secure it with a domain, and connect it to GitHub for automated deployments. This step-by-step guide covers firewall setup, domain configuration, and GitHub integration to get you running smoothly."
+---
+
+## 📥 1. Install Dokploy and Allow Port 3000 in Firewall
+
+Run the following commands on your server:
+
+```bash
+sudo ufw allow from YOUR_IP_ADDRESS to any port 3000
+```
+
+```bash
+curl -sSL https://dokploy.com/install.sh | sudo sh
+```
+
+## 🌐 2. Add a Domain for Security
+
+1. Open your server’s IP in the browser with port 3000 (e.g., http://YOUR_SERVER_IP:3000).
+2. Go to ⚙️ Settings > Web Server.
+3. Add your custom domain for secure access.
+
+## 🐙 3. Setup GitHub Integration
+
+1. Go to ⚙️ Settings > Git.
+2. Create a GitHub App for repository deployment.
+3. ✅ Enable Daily Docker Cleanup to save disk space
