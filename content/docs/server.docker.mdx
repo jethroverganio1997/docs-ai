@@ -1,0 +1,105 @@
+---
+title: "Docker Commands Documentation"
+description: "This document summarizes all Docker commands and related firewall commands used in this session. Each command includes a brief description and usage examples."
+---
+
+## 🐳 Docker Container Commands
+
+### 📄 List running containers
+```bash
+sudo docker ps
+```
+**Description:** Shows all currently running Docker containers, including their IDs, images, status, and exposed ports.
+
+---
+
+### 🖥️ Execute a shell in a running container
+```bash
+docker exec -it <container_id> sh
+```
+**Description:** Opens a shell session inside a running container.  
+**Example with IP address inspection:**
+```bash
+docker exec -it <container_id> sh -c "ip addr" 
+# sample traefic container id
+```
+**Note:** Use `sudo` if your user does not have Docker socket access.
+
+---
+
+### 🌐 Get container IP address
+```bash
+docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' <container_id>
+```
+**Description:** Retrieves the IP address of a container for a specific network.
+
+---
+
+## 🛠️ Docker Network Commands
+
+### 📋 List all Docker networks
+```bash
+sudo docker network ls
+```
+**Description:** Displays all Docker networks including bridge, overlay, host, and custom networks.
+
+---
+
+### 🔍 Inspect a specific Docker network
+```bash
+sudo docker network inspect <network_name>
+```
+**Description:** Shows detailed network information:
+* Name, ID, driver
+* Subnet and gateway (IPAM configuration)
+* Containers attached to the network
+* Options and labels
+* Peers (for overlay networks in Swarm)
+
+**Examples:**
+```bash
+sudo docker network inspect bridge
+sudo docker network inspect dokploy-network
+```
+
+---
+
+## ⚠️ Common Docker Errors
+
+### 🔒 Permission denied
+```text
+permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock
+```
+**Solution:** Use `sudo` or add your user to the `docker` group:
+```bash
+sudo usermod -aG docker $USER
+```
+
+### ❌ Unknown Docker command
+```bash
+docker ls
+```
+**Reason:** `docker ls` is not valid. Use `docker ps` or `docker images` instead.
+
+---
+
+## 📝 Notes on Docker Networking
+
+* **Bridge network (`bridge`)**: Default network for single-host communication. Example subnet: `172.17.0.0/16`  
+* **Overlay network (`dokploy-network`)**: Used in Swarm for multi-host communication. Example subnet: `10.0.1.0/24`  
+* **Multiple interfaces:** Containers may have multiple IPs (`eth0`, `eth1`, `eth2`). Firewall rules must allow all relevant subnets for services to communicate properly.
+
+---
+
+## 📌 Summary of Key Commands
+
+| Command                                | Purpose                                  |
+| -------------------------------------- | ---------------------------------------- |
+| `docker ps`                            | List running containers                  |
+| `docker exec -it <id> sh -c "ip addr"` | Inspect container network interfaces     |
+| `docker network ls`                    | List Docker networks                     |
+| `docker network inspect <network>`     | Inspect network details                  |
+| `ufw allow from <subnet>`              | Allow traffic from a subnet              |
+| `ufw delete <number>`                  | Delete firewall rule                     |
+| `ufw reload`                           | Reload firewall rules                    |
+| `ufw status verbose`                   | View firewall rules and default policies |

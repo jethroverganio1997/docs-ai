@@ -1,8 +1,7 @@
-import { createClient } from "@supabase/supabase-js";
-import { codeBlock, oneLine } from "common-tags";
-import { createOpenAI } from "@ai-sdk/openai";
-import { embed, type UIMessage } from "ai";
-import { convertToModelMessages, streamText } from "ai";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
+import { codeBlock, oneLine } from "https://esm.sh/common-tags@1.8.2";
+import { createOpenAI } from "https://esm.sh/@ai-sdk/openai@2.0.32";
+import { convertToModelMessages, streamText, embed, type UIMessage } from "https://esm.sh/ai@5.0.45";
 
 const openai = createOpenAI({
   apiKey: Deno.env.get("OPENAI_API_KEY"),

@@ -5,9 +5,7 @@ export default async function HomePage() {
   return (
     <main className="flex flex-1 flex-col justify-center text-center">
       <h1 className="text-6xl md:text-8xl font-bold mb-6 text-balance items-center">
-        <span className="text-gradient">FEE Remit</span>
-        <br />
-        <span className="text-gradient">Docs</span>
+        <span className="text-gradient">Jeth Docs</span>
         <br />
       </h1>
       <p className="text-fd-muted-foreground">

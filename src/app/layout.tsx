@@ -4,11 +4,11 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Providers from "./providers";
 
 export const metadata: Metadata = {
-  title: "FEE Remit Docs",
-  description: "Far East Express documentations",
-  // icons: {
-  //   icon: [{ url: "/favicon.ico" }],
-  // },
+  title: "Jet Docs",
+  description: "Jet Knowledge documentations",
+  icons: {
+    icon: [{ url: "/favicon.ico" }],
+  },
 };
 
 const geist = Geist({

@@ -1,5 +1,5 @@
 // supabase/functions/search/index.ts
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 import { HighlightedText, parseHighlights } from "../_lib/highlight-parser.ts";
 
 type SortedResult = {

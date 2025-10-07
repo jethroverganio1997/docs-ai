@@ -1,8 +1,8 @@
-import { Root, RootContent } from 'mdast';
-import { fromMarkdown } from 'mdast-util-from-markdown';
-import { toMarkdown } from 'mdast-util-to-markdown';
-import { toString } from 'mdast-util-to-string';
-import { u } from 'unist-builder';
+import { Root, RootContent } from 'https://esm.sh/v132/@types/mdast@4.0.0/index.d.ts';
+import { fromMarkdown } from 'https://esm.sh/v132/mdast-util-from-markdown@2.0.0';
+import { toMarkdown } from 'https://esm.sh/v132/mdast-util-to-markdown@2.1.0';
+import { toString } from 'https://esm.sh/v132/mdast-util-to-string@4.0.0';
+import { u } from 'https://esm.sh/v132/unist-builder@4.0.0';
 
 export type Json = Record<
   string,

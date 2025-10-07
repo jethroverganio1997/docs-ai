@@ -1,7 +1,7 @@
 /// <reference lib="deno.ns" />
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 import { processMarkdown } from "../_lib/markdown-parser.ts";
-import matter from "gray-matter";
+import matter from "https://esm.sh/gray-matter@4.0.3";
 import { structuredMarkdown } from "../_lib/markdown-structured-data.ts";
 // [3]
 const supabaseUrl = Deno.env.get("SUPABASE_URL");

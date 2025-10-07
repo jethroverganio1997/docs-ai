@@ -27,7 +27,7 @@ begin
   end;
 $$;
 
-create policy "Authenticated users can upload files"
+create policy "Users can upload files"
 on storage.objects for insert to authenticated with check (
   bucket_id = 'files' and owner = auth.uid() 
 );

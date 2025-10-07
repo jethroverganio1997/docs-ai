@@ -1,5 +1,5 @@
 
-import { marked } from 'marked';
+import { marked } from 'https://esm.sh/marked@16.3.0';
 
 /**
  * A slugify function to create URL-friendly IDs from heading text.

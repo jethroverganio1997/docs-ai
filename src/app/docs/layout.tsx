@@ -29,7 +29,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <>
             {logo}
             <span className="font-medium [.uwu_&]:hidden max-md:hidden">
-              FEE Remit
+              Jet Docs
             </span>
           </>
         ),

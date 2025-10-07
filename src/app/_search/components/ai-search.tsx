@@ -235,7 +235,7 @@ function Input(props: ComponentProps<"textarea">) {
 
 const roleName: Record<string, string> = {
   user: "you",
-  assistant: "feedocs",
+  assistant: "abby",
 };
 
 function Message({
@@ -281,7 +281,7 @@ function Message({
           {(message.metadata.sources as string[]).map((link, i) => (
             <Link
               key={i}
-              href={link}
+              href={link.startsWith("/") ? link : `/${link}`}
               onClick={() => setOpen(false)}
               className="block bg-secondary text-xs rounded-lg border p-3 hover:bg-fd-accent hover:text-fd-accent-foreground"
             >

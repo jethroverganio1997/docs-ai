@@ -1,9 +1,9 @@
 // Setup type definitions for built-in Supabase Runtime APIs
 /// <reference types="https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts" />
 
-import { createClient } from "@supabase/supabase-js";
-import { embed } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
+import { embed } from "https://esm.sh/ai@5.0.45";
+import { createOpenAI } from "https://esm.sh/@ai-sdk/openai@2.0.32";
 
 // [5]
 
