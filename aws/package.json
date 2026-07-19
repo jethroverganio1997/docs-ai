@@ -1,0 +1,34 @@
+{
+  "name": "personal-aws",
+  "version": "1.0.0",
+  "description": "1. Apply [`aws/rds/migrations/001_init_docs_schema.sql`](./rds/migrations/001_init_docs_schema.sql) to your AWS RDS PostgreSQL database. 2. Ensure the `pgvector` extension is available in the target RDS instance.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "bundle:process": "esbuild lambda/process/index.ts --bundle --platform=node --target=node22 --outfile=zip/process/index.js",
+    "bundle:search": "esbuild lambda/search/index.ts --bundle --platform=node --target=node22 --outfile=zip/search/index.js",
+    "bundle:chat": "esbuild lambda/chat/index.ts --bundle --platform=node --target=node22 --outfile=zip/chat/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@ai-sdk/openai-compatible": "^3.0.12",
+    "@aws-sdk/client-bedrock-runtime": "^3.1090.0",
+    "@aws-sdk/client-s3": "^3.1090.0",
+    "@aws-sdk/client-secrets-manager": "^3.1090.0",
+    "ai": "^7.0.31",
+    "gray-matter": "^4.0.3",
+    "marked": "^18.0.6",
+    "mdast-util-from-markdown": "^2.0.3",
+    "mdast-util-to-markdown": "^2.1.2",
+    "mdast-util-to-string": "^4.0.0",
+    "pg": "^8.22.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.20.0",
+    "esbuild": "^0.28.1"
+  }
+}

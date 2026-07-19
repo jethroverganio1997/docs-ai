@@ -4,13 +4,11 @@ import {
   DocsTitle,
   DocsBody,
 } from "fumadocs-ui/page";
-// import { DocsBody } from "../_components/docs-page";
 import { notFound } from "next/navigation";
-import { getPage } from "@/app/docs/_lib/actions";
+import { getPage } from "@/features/docs/actions";
 import { getMDXComponents } from "@/components/mdx/mdx-components";
-import { cookies } from "next/headers";
 import { unstable_cache as cacheTag } from "next/cache";
-import { DOCS_PAGE_KEY, DOCS_PAGE_TAG } from "../_lib/constants";
+import { DOCS_PAGE_KEY, DOCS_PAGE_TAG } from "@/features/docs/constants";
 import { remarkMdxFiles, remarkStructure } from "fumadocs-core/mdx-plugins";
 import { createCompiler } from "@fumadocs/mdx-remote";
 
@@ -24,17 +22,23 @@ const compiler = createCompiler({
   },
 });
 
-export default async function Page(props: PageProps<"/docs/[...slug]">) {
+type DocsPageProps = {
+  params: Promise<{
+    slug?: string[];
+  }>;
+};
+
+export default async function Page(props: DocsPageProps) {
   const params = await props.params;
-  const cookieStore = cookies();
+  const slug = params.slug ?? [];
 
   const getDocument = cacheTag(
     async () => {
-      return await getPage(params.slug!, cookieStore);
+      return await getPage(slug);
     },
-    [DOCS_PAGE_KEY, ...params.slug],
+    [DOCS_PAGE_KEY, ...slug],
     {
-      tags: [DOCS_PAGE_TAG, ...params.slug],
+      tags: [DOCS_PAGE_TAG, ...slug],
       revalidate: 60 * 60 * 24, // 24 hours (in seconds)
     }
   );

@@ -4,8 +4,8 @@ export default function DocsEmpty() {
   return (
     <EmptyState
       icon="inbox"
-      title="No documents uploaded"
-      description="You havent added any documents yet. Upload files to start building your collection."
+      title="No public documents available"
+      description="No documents were found in the AWS-backed docs collection yet."
     />
   );
 }

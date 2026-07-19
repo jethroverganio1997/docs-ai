@@ -2,12 +2,12 @@
 
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { useQuery } from "@tanstack/react-query";
-import { getPageTree } from "@/app/docs/_lib/actions";
-import { LAYOUT_TREE_TAG } from "./_lib/constants";
+import { getPageTree } from "@/features/docs/actions";
+import { LAYOUT_TREE_TAG } from "@/features/docs/constants";
 import { PageTree } from "fumadocs-core/server";
-import { baseOptions, linkItems, logo } from "@/app/layout.config";
-import { AISearchTrigger } from "../_search/components/ai-search";
-import { placeholderTree } from "./layout.config";
+import { baseOptions, linkItems, logo } from "@/config/navigation";
+import { AISearchTrigger } from "@/features/search/components/ai-search";
+import { placeholderTree } from "@/features/docs/placeholder-tree";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { data: pageTree } = useQuery<PageTree.Root>({
@@ -22,7 +22,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       // Use the tree from the store, which is updated by the query
       tree={pageTree ?? placeholderTree}
       {...base}
-      links={linkItems.filter((item) => item.type === "icon")}
+      links={linkItems}
       nav={{
         ...base.nav,
         title: (

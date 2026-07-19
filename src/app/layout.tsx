@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   },
 };
 
+type RootLayoutProps = {
+  children: React.ReactNode;
+};
+
 const geist = Geist({
   variable: "--font-sans",
   subsets: ["latin"],
@@ -21,7 +25,7 @@ const mono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default function Layout({ children }: LayoutProps<"/">) {
+export default function Layout({ children }: RootLayoutProps) {
   return (
     <html
       lang="en"
