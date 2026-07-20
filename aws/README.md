@@ -20,6 +20,14 @@
   - Intended for an API Gateway or Lambda Function URL endpoint.
   - Returns an AI answer plus source URLs using RDS vector matches.
 
+- `aws/lambda/docs-tree/index.ts`
+  - Intended for an API Gateway or Lambda Function URL endpoint.
+  - Returns the docs tree/list from the database.
+
+- `aws/lambda/docs-page/index.ts`
+  - Intended for an API Gateway or Lambda Function URL endpoint.
+  - Returns one document by slug, loading the selected file from S3 only when requested.
+
 ## process-document.ts Migration Guide
 
 This is the target flow for [`aws/lambda/process-document.ts`](./lambda/process-document.ts):
@@ -253,28 +261,33 @@ If your schema currently uses `vector(768)`, you must migrate that column before
 
 These values are expected by the Next.js app and/or Lambda functions:
 
-- `DATABASE_URL`
 - `AWS_REGION`
 - `BEDROCK_EMBEDDING_MODEL_ID`
   - Optional for `process-document.ts`. Suggested value: `amazon.titan-embed-text-v2:0`.
 - `BEDROCK_EMBEDDING_DIMENSIONS`
   - Optional for `process-document.ts`. Use `1024`, `512`, or `256`. This must match the pgvector column dimension.
-- `AWS_DOCS_BASE_URL`
-  - Public base URL for the uploaded MDX files, for example a CloudFront URL or public S3 prefix.
-  - This is still useful for the app, but `process-document.ts` no longer needs it once object reads move to `GetObject`.
-- `AWS_PUBLIC_ASSETS_BASE_URL`
-  - Optional public base URL for images. The app uses this to rewrite legacy Supabase public asset links inside old MDX files.
-- `OPENAI_API_KEY`
-- `OPENAI_BASE_URL` (optional, defaults to OpenAI)
-- `OPENAI_CHAT_MODEL` (optional, defaults to `gpt-5-mini`)
+- `NEXT_PUBLIC_DOCS_TREE_API_URL`
+  - Public API Gateway URL for the docs tree Lambda.
+- `NEXT_PUBLIC_DOCS_PAGE_API_URL`
+  - Public API Gateway URL for the docs page Lambda. The app appends `?slug=...` when loading a specific document.
+- `NEXT_PUBLIC_DOCS_SEARCH_API_URL`
+  - Public API Gateway URL for the search Lambda. The browser calls this directly.
+- `NEXT_PUBLIC_DOCS_CHAT_API_URL`
+  - Public API Gateway URL for the chat Lambda. The browser calls this directly.
+- `CORS_ALLOW_ORIGIN`
+  - Optional for the search and chat Lambdas. Defaults to `*`. Set this to your site origin if you want stricter browser access control.
 - `OPENAI_EMBEDDING_MODEL` (optional, defaults to `text-embedding-3-small`)
-  - Still used by `chat-documents.ts` until that Lambda is also migrated away from OpenAI.
+  - Still used by `process/index.ts` for document embeddings.
 
 ## App Endpoints
 
-The Next.js app now uses internal endpoints instead of Supabase:
+The Next.js app now calls API Gateway endpoints directly from the browser:
 
-- `/api/search`
-- `/api/chat`
+- `NEXT_PUBLIC_DOCS_TREE_API_URL`
+- `NEXT_PUBLIC_DOCS_PAGE_API_URL`
+- `NEXT_PUBLIC_DOCS_SEARCH_API_URL`
+- `NEXT_PUBLIC_DOCS_CHAT_API_URL`
 
-Both expect the AWS-backed database configuration above.
+The docs-tree, docs-page, search, and chat Lambdas must return CORS headers and
+respond to `OPTIONS` for browser clients. `aws/lambda/shared/http.ts`
+centralizes that response shape.

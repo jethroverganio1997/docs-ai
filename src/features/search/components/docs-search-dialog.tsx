@@ -16,9 +16,7 @@ import {
 import { useDocsSearch } from "../hooks/use-docs-search";
 
 export default function DocsSearchDialog(props: SharedProps) {
-  const { search, setSearch, query } = useDocsSearch({
-    api: "/api/search",
-  });
+  const { search, setSearch, query } = useDocsSearch({});
 
   return (
     <SearchDialog
@@ -61,8 +59,12 @@ export default function DocsSearchDialog(props: SharedProps) {
           )}
         />
         <SearchDialogFooter>
-          <p className="ms-auto text-xs text-fd-muted-foreground">
-            Search powered by AWS RDS
+          <p
+            className={`ms-auto text-xs ${
+              query.error ? "text-red-600" : "text-fd-muted-foreground"
+            }`}
+          >
+            {query.error?.message ?? "Search powered by AWS RDS"}
           </p>
         </SearchDialogFooter>
       </SearchDialogContent>

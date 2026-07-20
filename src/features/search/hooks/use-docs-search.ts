@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
-import { type SortedResult } from "fumadocs-core/search";
 import { DOCS_SEARCH_TAG } from "../constants";
+import { getDocsSearchApiUrl, normalizeSearchResponse } from "../api";
 import {
   type UseDocsSearchOptions,
   type UseDocsSearchResult,
@@ -11,7 +11,7 @@ export function useDocsSearch(
   options: UseDocsSearchOptions,
 ): UseDocsSearchResult {
   const {
-    api = "/api/search",
+    api,
     delayMs = 500,
     allowEmpty = false,
   } = options;
@@ -35,15 +35,27 @@ export function useDocsSearch(
       const params = new URLSearchParams();
       params.set("query", debouncedSearch.trim());
 
-      const response = await fetch(`${api}?${params.toString()}`, {
-        cache: "no-store",
-      });
+      const response = await fetch(
+        `${getDocsSearchApiUrl(api)}?${params.toString()}`,
+        {
+          cache: "no-store",
+        },
+      );
+      const payload = await response.json().catch(() => null);
 
       if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
+        const errorMessage =
+          payload &&
+          typeof payload === "object" &&
+          "error" in payload &&
+          typeof payload.error === "string"
+            ? payload.error
+            : `Request failed with status ${response.status}.`;
+
+        throw new Error(errorMessage);
       }
 
-      return response.json() as Promise<SortedResult[] | "empty">;
+      return normalizeSearchResponse(payload);
     },
     enabled: allowEmpty || !!debouncedSearch.trim(),
     staleTime: 5 * 60 * 1000,

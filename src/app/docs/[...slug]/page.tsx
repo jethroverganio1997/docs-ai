@@ -5,7 +5,7 @@ import {
   DocsBody,
 } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
-import { getPage } from "@/features/docs/actions";
+import { getPage } from "@/features/docs/api";
 import { getMDXComponents } from "@/components/mdx/mdx-components";
 import { unstable_cache as cacheTag } from "next/cache";
 import { DOCS_PAGE_KEY, DOCS_PAGE_TAG } from "@/features/docs/constants";

@@ -1,99 +1,59 @@
-import { Pool } from "pg";
 
+import { getDbPool } from "../shared/db";
 import {
-  SecretsManagerClient,
-  GetSecretValueCommand,
-} from "@aws-sdk/client-secrets-manager";
+  createJsonResponse,
+  createOptionsResponse,
+  getRequestMethod,
+} from "../shared/http";
 
-const secrets = new SecretsManagerClient({});
-
-async function getSecretString(secretId: string) {
-  const response = await secrets.send(
-    new GetSecretValueCommand({
-      SecretId: secretId,
-    }),
-  );
-
-  if (typeof response.SecretString === "string" && response.SecretString) {
-    return response.SecretString;
-  }
-
-  if (response.SecretBinary) {
-    return new TextDecoder().decode(response.SecretBinary);
-  }
-
-  throw new Error(`Secret '${secretId}' is empty`);
-}
-
-async function getDatabaseSecret() {
-  console.log("Fetching database secret from Secrets Manager");
-  const secret = JSON.parse(await getSecretString("personal-db-secret"));
-  console.log("Database secret fetched from Secrets Manager");
-
-  return secret;
-}
-
-let pool: Pool | null = null;
-
-async function getPool() {
-  console.log("Getting database pool");
-  if (pool) {
-    return pool;
-  }
-
-  const secret = await getDatabaseSecret();
-
-  pool = new Pool({
-    host: secret.host,
-    port: secret.port,
-    user: secret.username,
-    password: secret.password,
-    database: secret.dbname,
-    max: 5,
-    ssl: {
-      rejectUnauthorized: false,
-    },
-  });
-
-  console.log("Database pool created");
-  return pool;
-}
+const ALLOWED_METHODS = "GET,OPTIONS";
 
 export async function handler(event: {
   queryStringParameters?: Record<string, string | undefined>;
-}) {
-  const query = event.queryStringParameters?.query?.trim();
-   const db = await getPool();
-
-  if (!query) {
-    return {
-      statusCode: 400,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ error: 'Query parameter "query" is required.' }),
+  httpMethod?: string;
+  requestContext?: {
+    http?: {
+      method?: string;
     };
+  };
+}) {
+  if (getRequestMethod(event) === "OPTIONS") {
+    return createOptionsResponse(ALLOWED_METHODS);
   }
 
-  const { rows } = await db.query(
-    `
-      select
-        id,
-        url,
-        type,
-        content,
-        "contentWithHighlights",
-        rank
-      from search_documents($1)
-    `,
-    [query],
-  );
+  const query = event.queryStringParameters?.query?.trim();
 
-  return {
-    statusCode: 200,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(rows),
-  };
+  if (!query) {
+    return createJsonResponse(
+      400,
+      { error: 'Query parameter "query" is required.' },
+      ALLOWED_METHODS,
+    );
+  }
+
+  try {
+     const db = await getDbPool();
+    const { rows } = await db.query(
+      `
+        select
+          id,
+          url,
+          type,
+          content,
+          "contentWithHighlights",
+          rank
+        from search_documents($1)
+      `,
+      [query],
+    );
+
+    return createJsonResponse(200, rows, ALLOWED_METHODS);
+  } catch (error) {
+    console.error("Search Lambda failed", error);
+    return createJsonResponse(
+      500,
+      { error: "Failed to search documents." },
+      ALLOWED_METHODS,
+    );
+  }
 }

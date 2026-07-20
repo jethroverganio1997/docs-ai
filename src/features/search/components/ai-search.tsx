@@ -13,25 +13,22 @@ import {
 } from "react";
 import { Loader2, RefreshCw, SearchIcon, Send, X } from "lucide-react";
 import { buttonVariants } from "fumadocs-ui/components/ui/button";
-import { type UIMessage, useChat, type UseChatHelpers } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
 import { Presence } from "@radix-ui/react-presence";
 import { cn } from "fumadocs-ui/utils/cn";
 import Link from "next/link";
 import { Markdown } from "@/components/mdx/markdown";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getFileName } from "@/features/docs/utils";
-
-type MessageMetadata = {
-  sources?: string[];
-};
-
-export type CustomUIMessage = UIMessage<MessageMetadata>;
+import {
+  type CustomUIMessage,
+  useDocsChat,
+  type UseDocsChatHelpers,
+} from "../hooks/use-docs-chat";
 
 const Context = createContext<{
   open: boolean;
   setOpen: (open: boolean) => void;
-  chat: UseChatHelpers<CustomUIMessage>;
+  chat: UseDocsChatHelpers;
 } | null>(null);
 
 function useChatContext() {
@@ -47,14 +44,15 @@ function useAIContext() {
 }
 
 function SearchAIActions() {
-  const { messages, status, setMessages, regenerate } = useChatContext();
-  const isLoading = status === "streaming";
+  const { messages, status, setMessages, regenerate, stop } = useChatContext();
+  const isLoading = status === "streaming" || status === "submitted";
+  const canRetry = !isLoading && messages.length > 0;
 
   if (messages.length === 0) return null;
 
   return (
     <>
-      {!isLoading && messages.at(-1)?.role === "assistant" && (
+      {canRetry && (
         <button
           type="button"
           className={cn(
@@ -79,7 +77,10 @@ function SearchAIActions() {
             className: "rounded-full",
           }),
         )}
-        onClick={() => setMessages([])}
+        onClick={() => {
+          stop();
+          setMessages([]);
+        }}
       >
         Clear Chat
       </button>
@@ -304,13 +305,7 @@ function AssistantLoading() {
 
 export function AISearchTrigger() {
   const [open, setOpen] = useState(false);
-
-  const chat = useChat<CustomUIMessage>({
-    id: "search",
-    transport: new DefaultChatTransport({
-      api: "/api/chat",
-    }),
-  });
+  const chat = useDocsChat();
 
   const isWaitingForResponse =
     chat.status === "submitted" &&
@@ -380,11 +375,9 @@ export function AISearchTrigger() {
               }}
             >
               <div className="flex flex-col gap-4">
-                {chat.messages
-                  .filter((message) => message.role !== "system")
-                  .map((message) => (
-                    <Message key={message.id} message={message} />
-                  ))}
+                {chat.messages.map((message) => (
+                  <Message key={message.id} message={message} />
+                ))}
                 {isWaitingForResponse && <AssistantLoading />}
               </div>
             </List>

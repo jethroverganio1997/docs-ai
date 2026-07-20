@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { getPageTree } from "@/features/docs/actions";
+import { getPageTree } from "@/features/docs/api";
 import DocsEmpty from "@/app/docs/[...slug]/empty";
 import { useQuery } from "@tanstack/react-query";
 import { PAGE_TREE_TAG } from "@/features/docs/constants";

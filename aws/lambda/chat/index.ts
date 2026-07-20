@@ -1,11 +1,16 @@
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { embed, generateText } from "ai";
-import { Pool } from "pg";
 
 import {
   SecretsManagerClient,
   GetSecretValueCommand,
 } from "@aws-sdk/client-secrets-manager";
+import {
+  createJsonResponse,
+  createOptionsResponse,
+  getRequestMethod,
+} from "../shared/http";
+import { getDbPool } from "../shared/db";
 
 type ChatMessagePart = {
   type: string;
@@ -18,8 +23,7 @@ type ChatMessage = {
 };
 
 const secrets = new SecretsManagerClient({});
-
-let pool: Pool | null = null;
+const ALLOWED_METHODS = "POST,OPTIONS";
 
 async function getSecretString(secretId: string) {
   const response = await secrets.send(
@@ -39,13 +43,6 @@ async function getSecretString(secretId: string) {
   throw new Error(`Secret '${secretId}' is empty`);
 }
 
-async function getDatabaseSecret() {
-  console.log("Fetching database secret from Secrets Manager");
-  const secret = JSON.parse(await getSecretString("personal-db-secret"));
-  console.log("Database secret fetched from Secrets Manager");
-
-  return secret;
-}
 
 async function getOpenAISecret() {
   console.log("Fetching OpenAI secret from Secrets Manager");
@@ -53,30 +50,6 @@ async function getOpenAISecret() {
   console.log("OpenAI secret fetched from Secrets Manager");
 
   return secret;
-}
-
-async function getPool() {
-  console.log("Getting database pool");
-  if (pool) {
-    return pool;
-  }
-
-  const secret = await getDatabaseSecret();
-
-  pool = new Pool({
-    host: secret.host,
-    port: secret.port,
-    user: secret.username,
-    password: secret.password,
-    database: secret.dbname,
-    max: 5,
-    ssl: {
-      rejectUnauthorized: false,
-    },
-  });
-
-  console.log("Database pool created");
-  return pool;
 }
 
 async function getOpenAI() {
@@ -93,23 +66,43 @@ function toVectorLiteral(values: number[]) {
   return `[${values.join(",")}]`;
 }
 
-export async function handler(event: { body?: string }) {
-  const payload = JSON.parse(event.body ?? "{}") as {
-    messages?: ChatMessage[];
+export async function handler(event: {
+  body?: string;
+  httpMethod?: string;
+  requestContext?: {
+    http?: {
+      method?: string;
+    };
   };
-  
+}) {
+  if (getRequestMethod(event) === "OPTIONS") {
+    return createOptionsResponse(ALLOWED_METHODS);
+  }
+
+  let payload: {
+    messages?: ChatMessage[];
+  } = {};
+
+  try {
+    payload = JSON.parse(event.body ?? "{}") as {
+      messages?: ChatMessage[];
+    };
+  } catch {
+    return createJsonResponse(
+      400,
+      { error: "Invalid JSON body." },
+      ALLOWED_METHODS,
+    );
+  }
+
   const messages = payload.messages ?? [];
-  const db = await getPool();
-  const openai = await getOpenAI();
 
   if (messages.length === 0) {
-    return {
-      statusCode: 400,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ error: "No messages provided." }),
-    };
+    return createJsonResponse(
+      400,
+      { error: "No messages provided." },
+      ALLOWED_METHODS,
+    );
   }
 
   const latestQuestion = (messages[messages.length - 1]?.parts ?? [])
@@ -118,45 +111,54 @@ export async function handler(event: { body?: string }) {
     .join(" ")
     .trim();
 
-  console.log("Latest question:", latestQuestion);
-  const { embedding } = await embed({
-    model: openai.embeddingModel("text-embedding-3-small"),
-    value: latestQuestion,
-    providerOptions: {
-      openai: {
-        dimensions: 768,
+  if (!latestQuestion) {
+    return createJsonResponse(
+      400,
+      { error: "The latest message does not contain any text." },
+      ALLOWED_METHODS,
+    );
+  }
+
+  try {
+    const db = await getDbPool();
+    const openai = await getOpenAI();
+
+    console.log("Latest question:", latestQuestion);
+    const { embedding } = await embed({
+      model: openai.embeddingModel("text-embedding-3-small"),
+      value: latestQuestion,
+      providerOptions: {
+        openai: {
+          dimensions: 768,
+        },
       },
-    },
-  });
+    });
 
-  // console.log("Generated embedding:", embedding);
-  const { rows } = await db.query<{
-    content: string;
-    url: string;
-    similarity: number;
-  }>(
-    `
-      select
-        content,
-        url,
-        similarity
-      from match_document_embeddings(
-        $1::vector(768),
-        $2::double precision,
-        $3::integer
-      )
-    `,
-    [toVectorLiteral(embedding), 0.4, 5],
-  );
+    const { rows } = await db.query<{
+      content: string;
+      url: string;
+      similarity: number;
+    }>(
+      `
+        select
+          content,
+          url,
+          similarity
+        from match_document_embeddings(
+          $1::vector(768),
+          $2::double precision,
+          $3::integer
+        )
+      `,
+      [toVectorLiteral(embedding), 0.4, 5],
+    );
 
-  // console.log("Retrieved matching documents:", rows);
-  const context = rows.map((row) => row.content).join("\n\n");
-  const sources = [...new Set(rows.map((row) => row.url))];
+    const context = rows.map((row) => row.content).join("\n\n");
+    const sources = [...new Set(rows.map((row) => row.url))];
 
-  // console.log("Context:", context);
-  const answer = await generateText({
-    model: openai("gpt-5.4-mini"),
-    system: `
+    const answer = await generateText({
+      model: openai("gpt-5.4-mini"),
+      system: `
 You are a documentation assistant for a public knowledge base.
 
 Rules:
@@ -167,17 +169,23 @@ Rules:
 Context:
 ${context || "No matching documentation snippets were found."}
     `.trim(),
-    prompt: latestQuestion,
-  });
+      prompt: latestQuestion,
+    });
 
-  return {
-    statusCode: 200,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      answer: answer.text,
-      sources,
-    }),
-  };
+    return createJsonResponse(
+      200,
+      {
+        answer: answer.text,
+        sources,
+      },
+      ALLOWED_METHODS,
+    );
+  } catch (error) {
+    console.error("Chat Lambda failed", error);
+    return createJsonResponse(
+      500,
+      { error: "Failed to generate an answer." },
+      ALLOWED_METHODS,
+    );
+  }
 }

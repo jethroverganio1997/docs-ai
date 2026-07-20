@@ -64712,7 +64712,43 @@ var defaults = import_lib.default.defaults;
 
 // lambda/chat/index.ts
 var import_client_secrets_manager = __toESM(require_dist_cjs16());
+
+// lambda/shared/http.ts
+function getCorsOrigin() {
+  return process.env.CORS_ALLOW_ORIGIN?.trim() || "*";
+}
+function createCorsHeaders(allowedMethods) {
+  return {
+    "Access-Control-Allow-Origin": getCorsOrigin(),
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": allowedMethods,
+    "Access-Control-Max-Age": "86400"
+  };
+}
+function getRequestMethod(event) {
+  return event.requestContext?.http?.method ?? event.httpMethod ?? "GET";
+}
+function createJsonResponse(statusCode, body, allowedMethods) {
+  return {
+    statusCode,
+    headers: {
+      "Content-Type": "application/json",
+      ...createCorsHeaders(allowedMethods)
+    },
+    body: JSON.stringify(body)
+  };
+}
+function createOptionsResponse(allowedMethods) {
+  return {
+    statusCode: 204,
+    headers: createCorsHeaders(allowedMethods),
+    body: ""
+  };
+}
+
+// lambda/chat/index.ts
 var secrets = new import_client_secrets_manager.SecretsManagerClient({});
+var ALLOWED_METHODS = "POST,OPTIONS";
 var pool = null;
 async function getSecretString(secretId) {
   const response = await secrets.send(
@@ -64772,49 +64808,67 @@ function toVectorLiteral(values) {
   return `[${values.join(",")}]`;
 }
 async function handler(event) {
-  const payload2 = JSON.parse(event.body ?? "{}");
+  if (getRequestMethod(event) === "OPTIONS") {
+    return createOptionsResponse(ALLOWED_METHODS);
+  }
+  let payload2 = {};
+  try {
+    payload2 = JSON.parse(event.body ?? "{}");
+  } catch {
+    return createJsonResponse(
+      400,
+      { error: "Invalid JSON body." },
+      ALLOWED_METHODS
+    );
+  }
   const messages = payload2.messages ?? [];
-  const db = await getPool();
-  const openai = await getOpenAI();
   if (messages.length === 0) {
-    return {
-      statusCode: 400,
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ error: "No messages provided." })
-    };
+    return createJsonResponse(
+      400,
+      { error: "No messages provided." },
+      ALLOWED_METHODS
+    );
   }
   const latestQuestion = (messages[messages.length - 1]?.parts ?? []).filter((part) => part.type === "text").map((part) => part.text ?? "").join(" ").trim();
-  console.log("Latest question:", latestQuestion);
-  const { embedding } = await embed({
-    model: openai.embeddingModel("text-embedding-3-small"),
-    value: latestQuestion,
-    providerOptions: {
-      openai: {
-        dimensions: 768
+  if (!latestQuestion) {
+    return createJsonResponse(
+      400,
+      { error: "The latest message does not contain any text." },
+      ALLOWED_METHODS
+    );
+  }
+  try {
+    const db = await getPool();
+    const openai = await getOpenAI();
+    console.log("Latest question:", latestQuestion);
+    const { embedding } = await embed({
+      model: openai.embeddingModel("text-embedding-3-small"),
+      value: latestQuestion,
+      providerOptions: {
+        openai: {
+          dimensions: 768
+        }
       }
-    }
-  });
-  const { rows } = await db.query(
-    `
-      select
-        content,
-        url,
-        similarity
-      from match_document_embeddings(
-        $1::vector(768),
-        $2::double precision,
-        $3::integer
-      )
-    `,
-    [toVectorLiteral(embedding), 0.4, 5]
-  );
-  const context = rows.map((row) => row.content).join("\n\n");
-  const sources = [...new Set(rows.map((row) => row.url))];
-  const answer = await generateText({
-    model: openai("gpt-5.4-mini"),
-    system: `
+    });
+    const { rows } = await db.query(
+      `
+        select
+          content,
+          url,
+          similarity
+        from match_document_embeddings(
+          $1::vector(768),
+          $2::double precision,
+          $3::integer
+        )
+      `,
+      [toVectorLiteral(embedding), 0.4, 5]
+    );
+    const context = rows.map((row) => row.content).join("\n\n");
+    const sources = [...new Set(rows.map((row) => row.url))];
+    const answer = await generateText({
+      model: openai("gpt-5.4-mini"),
+      system: `
 You are a documentation assistant for a public knowledge base.
 
 Rules:
@@ -64825,18 +64879,24 @@ Rules:
 Context:
 ${context || "No matching documentation snippets were found."}
     `.trim(),
-    prompt: latestQuestion
-  });
-  return {
-    statusCode: 200,
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      answer: answer.text,
-      sources
-    })
-  };
+      prompt: latestQuestion
+    });
+    return createJsonResponse(
+      200,
+      {
+        answer: answer.text,
+        sources
+      },
+      ALLOWED_METHODS
+    );
+  } catch (error52) {
+    console.error("Chat Lambda failed", error52);
+    return createJsonResponse(
+      500,
+      { error: "Failed to generate an answer." },
+      ALLOWED_METHODS
+    );
+  }
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {

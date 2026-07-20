@@ -31373,29 +31373,12 @@ var require_dist_cjs16 = __commonJS({
   }
 });
 
-// lambda/search/index.ts
+// lambda/docs-tree/index.ts
 var index_exports = {};
 __export(index_exports, {
   handler: () => handler
 });
 module.exports = __toCommonJS(index_exports);
-
-// node_modules/pg/esm/index.mjs
-var import_lib = __toESM(require_lib2(), 1);
-var Client = import_lib.default.Client;
-var Pool = import_lib.default.Pool;
-var Connection = import_lib.default.Connection;
-var types = import_lib.default.types;
-var Query = import_lib.default.Query;
-var DatabaseError = import_lib.default.DatabaseError;
-var escapeIdentifier = import_lib.default.escapeIdentifier;
-var escapeLiteral = import_lib.default.escapeLiteral;
-var Result = import_lib.default.Result;
-var TypeOverrides = import_lib.default.TypeOverrides;
-var defaults = import_lib.default.defaults;
-
-// lambda/search/index.ts
-var import_client_secrets_manager = __toESM(require_dist_cjs16());
 
 // lambda/shared/http.ts
 function getCorsOrigin() {
@@ -31430,8 +31413,63 @@ function createOptionsResponse(allowedMethods) {
   };
 }
 
-// lambda/search/index.ts
+// lambda/shared/docs-utils.ts
+function formatName(name) {
+  const spacedName = name.replace(/-/g, " ");
+  const withoutExt = spacedName.replace(/\.[^/.]+$/, "");
+  const words = withoutExt.split(" ");
+  if (words.length === 0) return "";
+  const formatted = words[0].charAt(0).toUpperCase() + words[0].slice(1).toLowerCase();
+  return [formatted, ...words.slice(1).map((word) => word.toLowerCase())].join(
+    " "
+  );
+}
+function normalizeRouteUrl(url) {
+  return url.startsWith("/") ? url : `/${url}`;
+}
+function getRouteSegments(url) {
+  return url.replace(/^\/+/, "").replace(/^docs\/?/, "").split("/").filter(Boolean);
+}
+function sortTree(node) {
+  if (!node.children) return;
+  node.children.sort((a5, b5) => {
+    const aName = String(a5.name).toLowerCase();
+    const bName = String(b5.name).toLowerCase();
+    if (aName === "getting-started" && bName !== "getting-started") {
+      return -1;
+    }
+    if (bName === "getting-started" && aName !== "getting-started") {
+      return 1;
+    }
+    if (a5.type === "folder" && b5.type === "page") return -1;
+    if (a5.type === "page" && b5.type === "folder") return 1;
+    return String(a5.name).localeCompare(String(b5.name));
+  });
+  for (const child of node.children) {
+    if (child.type === "folder") {
+      sortTree(child);
+    }
+  }
+}
+
+// node_modules/pg/esm/index.mjs
+var import_lib = __toESM(require_lib2(), 1);
+var Client = import_lib.default.Client;
+var Pool = import_lib.default.Pool;
+var Connection = import_lib.default.Connection;
+var types = import_lib.default.types;
+var Query = import_lib.default.Query;
+var DatabaseError = import_lib.default.DatabaseError;
+var escapeIdentifier = import_lib.default.escapeIdentifier;
+var escapeLiteral = import_lib.default.escapeLiteral;
+var Result = import_lib.default.Result;
+var TypeOverrides = import_lib.default.TypeOverrides;
+var defaults = import_lib.default.defaults;
+
+// lambda/shared/db.ts
+var import_client_secrets_manager = __toESM(require_dist_cjs16());
 var secrets = new import_client_secrets_manager.SecretsManagerClient({});
+var pool = null;
 async function getSecretString(secretId) {
   const response = await secrets.send(
     new import_client_secrets_manager.GetSecretValueCommand({
@@ -31447,15 +31485,9 @@ async function getSecretString(secretId) {
   throw new Error(`Secret '${secretId}' is empty`);
 }
 async function getDatabaseSecret() {
-  console.log("Fetching database secret from Secrets Manager");
-  const secret = JSON.parse(await getSecretString("personal-db-secret"));
-  console.log("Database secret fetched from Secrets Manager");
-  return secret;
+  return JSON.parse(await getSecretString("personal-db-secret"));
 }
-var pool = null;
-var ALLOWED_METHODS = "GET,OPTIONS";
-async function getPool() {
-  console.log("Getting database pool");
+async function getDbPool() {
   if (pool) {
     return pool;
   }
@@ -31471,42 +31503,64 @@ async function getPool() {
       rejectUnauthorized: false
     }
   });
-  console.log("Database pool created");
   return pool;
 }
+
+// lambda/docs-tree/index.ts
+var ALLOWED_METHODS = "GET,OPTIONS";
 async function handler(event) {
   if (getRequestMethod(event) === "OPTIONS") {
     return createOptionsResponse(ALLOWED_METHODS);
   }
-  const query = event.queryStringParameters?.query?.trim();
-  if (!query) {
-    return createJsonResponse(
-      400,
-      { error: 'Query parameter "query" is required.' },
-      ALLOWED_METHODS
-    );
-  }
   try {
-    const db = await getPool();
+    const db = await getDbPool();
     const { rows } = await db.query(
       `
-        select
-          id,
-          url,
-          type,
-          content,
-          "contentWithHighlights",
-          rank
-        from search_documents($1)
-      `,
-      [query]
+        select url
+        from documents
+        order by url asc
+      `
     );
-    return createJsonResponse(200, rows, ALLOWED_METHODS);
+    const root5 = {
+      name: "Docs",
+      children: []
+    };
+    for (const row of rows) {
+      const segments = getRouteSegments(row.url);
+      if (segments.length === 0) {
+        continue;
+      }
+      const pageSegment = segments.at(-1);
+      const dirSegments = segments.slice(0, -1);
+      let currentNode = root5;
+      for (const segment of dirSegments) {
+        let folderNode = currentNode.children?.find(
+          (node) => node.type === "folder" && node.name === formatName(segment)
+        );
+        if (!folderNode) {
+          folderNode = {
+            type: "folder",
+            name: formatName(segment),
+            defaultOpen: currentNode === root5,
+            children: []
+          };
+          currentNode.children?.push(folderNode);
+        }
+        currentNode = folderNode;
+      }
+      currentNode.children?.push({
+        type: "page",
+        name: formatName(pageSegment),
+        url: normalizeRouteUrl(row.url)
+      });
+    }
+    sortTree(root5);
+    return createJsonResponse(200, root5, ALLOWED_METHODS);
   } catch (error2) {
-    console.error("Search Lambda failed", error2);
+    console.error("Docs tree Lambda failed", error2);
     return createJsonResponse(
       500,
-      { error: "Failed to search documents." },
+      { error: "Failed to load docs tree." },
       ALLOWED_METHODS
     );
   }

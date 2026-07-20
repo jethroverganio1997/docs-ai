@@ -6,6 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
+    "bundle:docs-tree": "esbuild lambda/docs-tree/index.ts --bundle --platform=node --target=node22 --outfile=zip/docs-tree/index.js",
+    "bundle:docs-page": "esbuild lambda/docs-page/index.ts --bundle --platform=node --target=node22 --outfile=zip/docs-page/index.js",
     "bundle:process": "esbuild lambda/process/index.ts --bundle --platform=node --target=node22 --outfile=zip/process/index.js",
     "bundle:search": "esbuild lambda/search/index.ts --bundle --platform=node --target=node22 --outfile=zip/search/index.js",
     "bundle:chat": "esbuild lambda/chat/index.ts --bundle --platform=node --target=node22 --outfile=zip/chat/index.js"

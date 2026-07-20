@@ -1,12 +1,12 @@
 import matter from "gray-matter";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { Pool } from "pg";
 import { processMarkdown } from "../shared/markdown-parser";
 import { structuredMarkdown } from "../shared/markdown-structured-data";
 import {
   SecretsManagerClient,
   GetSecretValueCommand,
 } from "@aws-sdk/client-secrets-manager";
+import { getDbPool } from "../shared/db";
 
 type EventBridgeS3Event = {
   "detail-type": string;
@@ -33,33 +33,6 @@ const secrets = new SecretsManagerClient({});
 const openaiEmbeddingModelId =
   process.env.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small";
 const openaiEmbeddingDimensions = 768;
-
-let pool: Pool | null = null;
-let openaiApiKey: Promise<string> | null = null;
-
-async function getPool() {
-  console.log("Getting database pool");
-  if (pool) {
-    return pool;
-  }
-
-  const secret = await getDatabaseSecret();
-
-  pool = new Pool({
-    host: secret.host,
-    port: secret.port,
-    user: secret.username,
-    password: secret.password,
-    database: secret.dbname,
-    max: 5,
-    ssl: {
-      rejectUnauthorized: false,
-    },
-  });
-
-  console.log("Database pool created");
-  return pool;
-}
 
 function normalizeDocumentEvent(
   event: EventBridgeS3Event,
@@ -103,14 +76,6 @@ async function fetchDocumentText(
     console.error("GetObject failed:", err);
     throw err;
   }
-}
-
-async function getDatabaseSecret() {
-  console.log("Fetching database secret from Secrets Manager");
-  const secret = JSON.parse(await getSecretString("personal-db-secret"));
-  console.log("Database secret fetched from Secrets Manager");
-
-  return secret;
 }
 
 async function getOpenAISecret() {
@@ -187,7 +152,7 @@ async function getEmbedding(content: string, openaiKey: string) {
 }
 
 async function removeDocument(storageKey: string) {
-  const db = await getPool();
+  const db = await getDbPool();
 
   await db.query("delete from documents where storage_key = $1", [storageKey]);
 }
@@ -213,7 +178,7 @@ async function upsertDocument(
               .replace(/\./g, "/");      // Replace all remaining dots with "/"
 
   console.log("Start database connection");
-  const db = await getPool();
+  const db = await getDbPool();
   const client = await db.connect();
   console.log("Connected to database");
   const secret = await getOpenAISecret();
