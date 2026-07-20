@@ -24,17 +24,16 @@ export type ChatApiResponse = {
   error?: string;
 };
 
-const SEARCH_API_ENV = "NEXT_PUBLIC_DOCS_SEARCH_API_URL";
-const CHAT_API_ENV = "NEXT_PUBLIC_DOCS_CHAT_API_URL";
+const DOCS_BASE_API_ENV = "NEXT_PUBLIC_DOCS_API_BASE_URL";
 
-function requirePublicApiUrl(name: string, explicitUrl?: string) {
-  const resolvedUrl = explicitUrl?.trim() || process.env[name]?.trim();
+function getRequiredApiUrl(envName: string) {
+  const apiUrl = process.env[envName]?.trim();
 
-  if (!resolvedUrl) {
-    throw new Error(`${name} is not configured.`);
+  if (!apiUrl) {
+    throw new Error(`${envName} is not configured.`);
   }
 
-  return resolvedUrl;
+  return apiUrl;
 }
 
 function isSearchResultRow(value: unknown): value is SearchResultRow {
@@ -70,12 +69,18 @@ function isSortedResult(value: unknown): value is SortedResult {
   );
 }
 
-export function getDocsSearchApiUrl(explicitUrl?: string) {
-  return requirePublicApiUrl(SEARCH_API_ENV, explicitUrl);
+export function getDocsSearchApiUrl() {
+  const baseUrl = getRequiredApiUrl(DOCS_BASE_API_ENV);
+  const searchUrl = `${baseUrl}/docs/search`;
+
+  return searchUrl;
 }
 
-export function getDocsChatApiUrl(explicitUrl?: string) {
-  return requirePublicApiUrl(CHAT_API_ENV, explicitUrl);
+export function getDocsChatApiUrl() {
+  const baseUrl = getRequiredApiUrl(DOCS_BASE_API_ENV);
+  const chatUrl = `${baseUrl}/docs/chat`;
+
+  return chatUrl;
 }
 
 export function toSortedResult(item: SearchResultRow): SortedResult {

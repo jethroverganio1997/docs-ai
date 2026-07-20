@@ -11,7 +11,6 @@ export function useDocsSearch(
   options: UseDocsSearchOptions,
 ): UseDocsSearchResult {
   const {
-    api,
     delayMs = 500,
     allowEmpty = false,
   } = options;
@@ -36,7 +35,7 @@ export function useDocsSearch(
       params.set("query", debouncedSearch.trim());
 
       const response = await fetch(
-        `${getDocsSearchApiUrl(api)}?${params.toString()}`,
+        `${getDocsSearchApiUrl()}?${params.toString()}`,
         {
           cache: "no-store",
         },
