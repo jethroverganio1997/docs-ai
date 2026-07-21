@@ -1,33 +1,8 @@
-import { PageTree } from "fumadocs-core/server";
-import { type Frontmatter } from "./types";
+import type { PageTree } from "fumadocs-core/server";
 
 type DocsApiError = {
   error?: string;
 };
-
-export type DocsPageResponse = {
-  frontmatter: Frontmatter;
-  content: string;
-  directPath: string;
-  url: string;
-};
-
-function getBaseApiUrl() {
-  const apiUrl = process.env.NEXT_PUBLIC_DOCS_API_BASE_URL?.trim();
-
-  if (!apiUrl) {
-    throw new Error("NEXT_PUBLIC_DOCS_API_BASE_URL is not configured.");
-  }
-
-  return apiUrl;
-}
-
-function buildDocsPageApiUrl(slug: string) {
-   const baseUrl = getBaseApiUrl();
-   const docsUrl = `${baseUrl}/docs/${slug}`;
-
-  return docsUrl;
-}
 
 async function readError(response: Response) {
   const payload = await response.json().catch(() => null) as DocsApiError | null;
@@ -46,26 +21,8 @@ function isPageTreeRoot(payload: unknown): payload is PageTree.Root {
     Array.isArray((payload as { children?: unknown }).children);
 }
 
-function isDocsPageResponse(payload: unknown): payload is DocsPageResponse {
-  if (!payload || typeof payload !== "object") {
-    return false;
-  }
-
-  const candidate = payload as Record<string, unknown>;
-
-  return (
-    typeof candidate.content === "string" &&
-    typeof candidate.directPath === "string" &&
-    typeof candidate.url === "string" &&
-    !!candidate.frontmatter &&
-    typeof candidate.frontmatter === "object"
-  );
-}
-
 export async function getPageTree(): Promise<PageTree.Root> {
-  const baseUrl = getBaseApiUrl();
-  const pageTreeUrl = `${baseUrl}/docs/tree`;
-  const response = await fetch(pageTreeUrl, {
+  const response = await fetch("/api/docs/tree", {
     cache: "no-store",
   });
 
@@ -77,39 +34,6 @@ export async function getPageTree(): Promise<PageTree.Root> {
 
   if (!isPageTreeRoot(payload)) {
     throw new Error("Unexpected docs tree response.");
-  }
-
-  return payload;
-}
-
-export async function getPage(
-  slugs: string[],
-): Promise<DocsPageResponse | null> {
-  if (slugs.length === 0) {
-    return null;
-  }
-
-  const response = await fetch(
-    buildDocsPageApiUrl(slugs.join("/")),
-    {
-      next: {
-        revalidate: 60 * 60,
-      },
-    },
-  );
-
-  if (response.status === 404) {
-    return null;
-  }
-
-  if (!response.ok) {
-    throw new Error(await readError(response));
-  }
-
-  const payload = await response.json();
-
-  if (!isDocsPageResponse(payload)) {
-    throw new Error("Unexpected docs page response.");
   }
 
   return payload;

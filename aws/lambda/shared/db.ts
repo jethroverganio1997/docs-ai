@@ -1,33 +1,57 @@
 import { Pool } from "pg";
-import {
-  GetSecretValueCommand,
-  SecretsManagerClient,
-} from "@aws-sdk/client-secrets-manager";
-
-const secrets = new SecretsManagerClient({});
+import { getSecretString } from "./secrets";
 
 let pool: Pool | null = null;
 
-async function getSecretString(secretId: string) {
-  const response = await secrets.send(
-    new GetSecretValueCommand({
-      SecretId: secretId,
-    }),
-  );
+type DatabaseSecret = {
+  host: string;
+  port: number;
+  username: string;
+  password: string;
+  dbname: string;
+};
 
-  if (typeof response.SecretString === "string" && response.SecretString) {
-    return response.SecretString;
+function parseDatabaseSecret(value: string): DatabaseSecret {
+  let payload: unknown;
+
+  try {
+    payload = JSON.parse(value);
+  } catch {
+    throw new Error("Database secret must be valid JSON.");
   }
 
-  if (response.SecretBinary) {
-    return new TextDecoder().decode(response.SecretBinary);
+  if (!payload || typeof payload !== "object") {
+    throw new Error("Database secret must be an object.");
   }
 
-  throw new Error(`Secret '${secretId}' is empty`);
+  const candidate = payload as Record<string, unknown>;
+  const port = Number(candidate.port);
+
+  if (
+    typeof candidate.host !== "string" ||
+    !candidate.host ||
+    !Number.isInteger(port) ||
+    port < 1 ||
+    port > 65_535 ||
+    typeof candidate.username !== "string" ||
+    typeof candidate.password !== "string" ||
+    typeof candidate.dbname !== "string"
+  ) {
+    throw new Error("Database secret is missing required connection fields.");
+  }
+
+  return {
+    host: candidate.host,
+    port,
+    username: candidate.username,
+    password: candidate.password,
+    dbname: candidate.dbname,
+  };
 }
 
 async function getDatabaseSecret() {
-  return JSON.parse(await getSecretString("personal-db-secret"));
+  const secretId = process.env.DATABASE_SECRET_ID?.trim() || "personal-db-secret";
+  return parseDatabaseSecret(await getSecretString(secretId));
 }
 
 export async function getDbPool() {

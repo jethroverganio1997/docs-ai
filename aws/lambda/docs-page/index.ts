@@ -2,6 +2,7 @@ import matter from "gray-matter";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import {
   createJsonResponse,
+  createMethodNotAllowedResponse,
   createOptionsResponse,
   getRequestMethod,
 } from "../shared/http";
@@ -48,6 +49,10 @@ async function fetchDocumentText(bucketName: string, storageKey: string) {
 export async function handler(event: DocsPageEvent) {
   if (getRequestMethod(event) === "OPTIONS") {
     return createOptionsResponse(ALLOWED_METHODS);
+  }
+
+  if (getRequestMethod(event) !== "GET") {
+    return createMethodNotAllowedResponse(ALLOWED_METHODS);
   }
 
   const slugValue = event.pathParameters?.slug?.trim();

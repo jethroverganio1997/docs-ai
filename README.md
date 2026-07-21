@@ -7,14 +7,21 @@ This is a Next.js + Fumadocs documentation app.
 Set these variables for the web app:
 
 ```bash
-NEXT_PUBLIC_DOCS_TREE_API_URL=
-NEXT_PUBLIC_DOCS_PAGE_API_URL=
-NEXT_PUBLIC_DOCS_SEARCH_API_URL=
-NEXT_PUBLIC_DOCS_CHAT_API_URL=
+DOCS_API_BASE_URL=
+# Optional, when API Gateway requires them:
+DOCS_API_KEY=
+DOCS_API_AUTHORIZATION=
 ```
 
-The web app now reaches backend data only through API Gateway. Docs tree, docs
-page content, search, and AI chat are all backed by Lambda endpoints.
+The browser calls only same-origin Next.js routes. The Next.js server proxies
+docs tree, page content, search, and AI chat to API Gateway; the upstream URL
+and optional credentials are never sent to the browser.
+
+For the EC2 deployment, put the same values in
+`/etc/personal-docs-web.env` (owned by `root` with mode `600`). The deploy
+script passes that file to the container at runtime; do not supply these values
+as Docker build arguments. The deployment waits for the container health check
+before reporting success.
 
 Run development server:
 

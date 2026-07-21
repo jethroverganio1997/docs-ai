@@ -1,5 +1,6 @@
 import {
   createJsonResponse,
+  createMethodNotAllowedResponse,
   createOptionsResponse,
   getRequestMethod,
 } from "../shared/http";
@@ -31,6 +32,10 @@ const ALLOWED_METHODS = "GET,OPTIONS";
 export async function handler(event: DocsTreeEvent) {
   if (getRequestMethod(event) === "OPTIONS") {
     return createOptionsResponse(ALLOWED_METHODS);
+  }
+
+  if (getRequestMethod(event) !== "GET") {
+    return createMethodNotAllowedResponse(ALLOWED_METHODS);
   }
 
   try {

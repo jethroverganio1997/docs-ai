@@ -2,6 +2,7 @@
 import { getDbPool } from "../shared/db";
 import {
   createJsonResponse,
+  createMethodNotAllowedResponse,
   createOptionsResponse,
   getRequestMethod,
 } from "../shared/http";
@@ -19,6 +20,10 @@ export async function handler(event: {
 }) {
   if (getRequestMethod(event) === "OPTIONS") {
     return createOptionsResponse(ALLOWED_METHODS);
+  }
+
+  if (getRequestMethod(event) !== "GET") {
+    return createMethodNotAllowedResponse(ALLOWED_METHODS);
   }
 
   const query = event.queryStringParameters?.query?.trim();

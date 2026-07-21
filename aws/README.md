@@ -266,28 +266,30 @@ These values are expected by the Next.js app and/or Lambda functions:
   - Optional for `process-document.ts`. Suggested value: `amazon.titan-embed-text-v2:0`.
 - `BEDROCK_EMBEDDING_DIMENSIONS`
   - Optional for `process-document.ts`. Use `1024`, `512`, or `256`. This must match the pgvector column dimension.
-- `NEXT_PUBLIC_DOCS_TREE_API_URL`
-  - Public API Gateway URL for the docs tree Lambda.
-- `NEXT_PUBLIC_DOCS_PAGE_API_URL`
-  - Public API Gateway URL for the docs page Lambda. The app appends `?slug=...` when loading a specific document.
-- `NEXT_PUBLIC_DOCS_SEARCH_API_URL`
-  - Public API Gateway URL for the search Lambda. The browser calls this directly.
-- `NEXT_PUBLIC_DOCS_CHAT_API_URL`
-  - Public API Gateway URL for the chat Lambda. The browser calls this directly.
+- `DATABASE_SECRET_ID`
+  - Optional Secrets Manager ID for the database credentials. Defaults to `personal-db-secret`.
+- `OPENAI_SECRET_ID`
+  - Optional Secrets Manager ID for the OpenAI credentials. Defaults to `openai-key`.
+- `DOCS_API_BASE_URL`
+  - Server-only API Gateway base URL, for example `https://xxxxx.execute-api.ap-northeast-1.amazonaws.com/prod`.
+- `DOCS_API_KEY`
+  - Optional server-only API Gateway API key. The Next.js proxy sends it as `x-api-key`.
+- `DOCS_API_AUTHORIZATION`
+  - Optional server-only authorization header value. The Next.js proxy sends it as `Authorization`.
 - `CORS_ALLOW_ORIGIN`
-  - Optional for the search and chat Lambdas. Defaults to `*`. Set this to your site origin if you want stricter browser access control.
+  - Required only for non-BFF browser clients that call API Gateway directly. When unset, the Lambda responses do not include CORS headers.
 - `OPENAI_EMBEDDING_MODEL` (optional, defaults to `text-embedding-3-small`)
   - Still used by `process/index.ts` for document embeddings.
 
 ## App Endpoints
 
-The Next.js app now calls API Gateway endpoints directly from the browser:
+The browser calls only these same-origin Next.js routes:
 
-- `NEXT_PUBLIC_DOCS_TREE_API_URL`
-- `NEXT_PUBLIC_DOCS_PAGE_API_URL`
-- `NEXT_PUBLIC_DOCS_SEARCH_API_URL`
-- `NEXT_PUBLIC_DOCS_CHAT_API_URL`
+- `GET /api/docs/tree`
+- `GET /api/docs/:slug*`
+- `GET /api/docs/search?query=...`
+- `POST /api/docs/chat`
 
-The docs-tree, docs-page, search, and chat Lambdas must return CORS headers and
-respond to `OPTIONS` for browser clients. `aws/lambda/shared/http.ts`
-centralizes that response shape.
+The Next.js Route Handlers call API Gateway with `DOCS_API_BASE_URL` and any
+configured private credentials. CORS is no longer needed for browser access to
+API Gateway; it can be restricted to the Next.js server's network path.

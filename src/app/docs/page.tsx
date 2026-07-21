@@ -5,11 +5,10 @@ import { getPageTree } from "@/features/docs/api";
 import DocsEmpty from "@/app/docs/[...slug]/empty";
 import { useQuery } from "@tanstack/react-query";
 import { PAGE_TREE_TAG } from "@/features/docs/constants";
-import { PageTree } from "fumadocs-core/server";
+import type { PageTree } from "fumadocs-core/server";
 import { useEffect } from "react";
 import DocsLoadingPage from "./[...slug]/loading";
 
-// Helper function remains the same
 function findFirstPageUrl(nodes: PageTree.Node[]): string | null {
   for (const node of nodes) {
     if (node.type === "page") return node.url;

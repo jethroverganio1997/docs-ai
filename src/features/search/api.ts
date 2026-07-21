@@ -24,18 +24,6 @@ export type ChatApiResponse = {
   error?: string;
 };
 
-
-function getBaseApiUrl() {
-  const apiUrl = process.env.NEXT_PUBLIC_DOCS_API_BASE_URL?.trim();
-
-  if (!apiUrl) {
-    throw new Error("NEXT_PUBLIC_DOCS_API_BASE_URL is not configured.");
-  }
-
-  return apiUrl;
-}
-
-
 function isSearchResultRow(value: unknown): value is SearchResultRow {
   if (!value || typeof value !== "object") {
     return false;
@@ -70,17 +58,11 @@ function isSortedResult(value: unknown): value is SortedResult {
 }
 
 export function getDocsSearchApiUrl() {
-  const baseUrl = getBaseApiUrl();
-  const searchUrl = `${baseUrl}/docs/search`;
-
-  return searchUrl;
+  return "/api/docs/search";
 }
 
 export function getDocsChatApiUrl() {
-  const baseUrl = getBaseApiUrl();
-  const chatUrl = `${baseUrl}/docs/chat`;
-
-  return chatUrl;
+  return "/api/docs/chat";
 }
 
 export function toSortedResult(item: SearchResultRow): SortedResult {

@@ -87,11 +87,36 @@ export function Markdown({ text }: { text: string }) {
   );
 }
 
+const MAX_MARKDOWN_CACHE_ENTRIES = 100;
 const cache = new Map<string, Promise<ReactNode>>();
 
-function Renderer({ text }: { text: string }) {
-  const result = cache.get(text) ?? processor.process(text);
+function getCachedMarkdown(text: string) {
+  const existing = cache.get(text);
+
+  if (existing) {
+    return existing;
+  }
+
+  const result = processor.process(text);
   cache.set(text, result);
 
-  return use(result);
+  if (cache.size > MAX_MARKDOWN_CACHE_ENTRIES) {
+    const oldestKey = cache.keys().next().value;
+
+    if (oldestKey) {
+      cache.delete(oldestKey);
+    }
+  }
+
+  void result.catch(() => {
+    if (cache.get(text) === result) {
+      cache.delete(text);
+    }
+  });
+
+  return result;
+}
+
+function Renderer({ text }: { text: string }) {
+  return use(getCachedMarkdown(text));
 }

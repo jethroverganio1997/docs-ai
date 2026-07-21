@@ -2,15 +2,13 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { embed, generateText } from "ai";
 
 import {
-  SecretsManagerClient,
-  GetSecretValueCommand,
-} from "@aws-sdk/client-secrets-manager";
-import {
   createJsonResponse,
+  createMethodNotAllowedResponse,
   createOptionsResponse,
   getRequestMethod,
 } from "../shared/http";
 import { getDbPool } from "../shared/db";
+import { getSecretString } from "../shared/secrets";
 
 type ChatMessagePart = {
   type: string;
@@ -22,34 +20,19 @@ type ChatMessage = {
   parts?: ChatMessagePart[];
 };
 
-const secrets = new SecretsManagerClient({});
 const ALLOWED_METHODS = "POST,OPTIONS";
 
-async function getSecretString(secretId: string) {
-  const response = await secrets.send(
-    new GetSecretValueCommand({
-      SecretId: secretId,
-    }),
-  );
-
-  if (typeof response.SecretString === "string" && response.SecretString) {
-    return response.SecretString;
-  }
-
-  if (response.SecretBinary) {
-    return new TextDecoder().decode(response.SecretBinary);
-  }
-
-  throw new Error(`Secret '${secretId}' is empty`);
-}
-
-
 async function getOpenAISecret() {
-  console.log("Fetching OpenAI secret from Secrets Manager");
-  const secret = JSON.parse(await getSecretString("openai-key"));
-  console.log("OpenAI secret fetched from Secrets Manager");
+  const secretId = process.env.OPENAI_SECRET_ID?.trim() || "openai-key";
+  const secret = JSON.parse(await getSecretString(secretId)) as {
+    openaiKey?: unknown;
+  };
 
-  return secret;
+  if (typeof secret.openaiKey !== "string" || !secret.openaiKey) {
+    throw new Error("OpenAI secret is missing openaiKey.");
+  }
+
+  return { openaiKey: secret.openaiKey };
 }
 
 async function getOpenAI() {
@@ -77,6 +60,10 @@ export async function handler(event: {
 }) {
   if (getRequestMethod(event) === "OPTIONS") {
     return createOptionsResponse(ALLOWED_METHODS);
+  }
+
+  if (getRequestMethod(event) !== "POST") {
+    return createMethodNotAllowedResponse(ALLOWED_METHODS);
   }
 
   let payload: {
@@ -123,7 +110,6 @@ export async function handler(event: {
     const db = await getDbPool();
     const openai = await getOpenAI();
 
-    console.log("Latest question:", latestQuestion);
     const { embedding } = await embed({
       model: openai.embeddingModel("text-embedding-3-small"),
       value: latestQuestion,

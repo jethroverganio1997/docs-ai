@@ -14,12 +14,18 @@ type LambdaResponse = {
 };
 
 function getCorsOrigin() {
-  return process.env.CORS_ALLOW_ORIGIN?.trim() || "*";
+  return process.env.CORS_ALLOW_ORIGIN?.trim();
 }
 
-function createCorsHeaders(allowedMethods: string) {
+function createCorsHeaders(allowedMethods: string): Record<string, string> {
+  const origin = getCorsOrigin();
+
+  if (!origin) {
+    return {};
+  }
+
   return {
-    "Access-Control-Allow-Origin": getCorsOrigin(),
+    "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Allow-Methods": allowedMethods,
     "Access-Control-Max-Age": "86400",
@@ -50,5 +56,19 @@ export function createOptionsResponse(allowedMethods: string): LambdaResponse {
     statusCode: 204,
     headers: createCorsHeaders(allowedMethods),
     body: "",
+  };
+}
+
+export function createMethodNotAllowedResponse(
+  allowedMethods: string,
+): LambdaResponse {
+  return {
+    statusCode: 405,
+    headers: {
+      "Content-Type": "application/json",
+      Allow: allowedMethods,
+      ...createCorsHeaders(allowedMethods),
+    },
+    body: JSON.stringify({ error: "Method not allowed." }),
   };
 }

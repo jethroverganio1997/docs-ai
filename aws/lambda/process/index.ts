@@ -3,9 +3,8 @@ import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { processMarkdown } from "../shared/markdown-parser";
 import { structuredMarkdown } from "../shared/markdown-structured-data";
 import {
-  SecretsManagerClient,
-  GetSecretValueCommand,
-} from "@aws-sdk/client-secrets-manager";
+  getSecretString,
+} from "../shared/secrets";
 import { getDbPool } from "../shared/db";
 
 type EventBridgeS3Event = {
@@ -28,8 +27,6 @@ type DocumentEvent = {
 };
 
 const s3 = new S3Client({});
-const secrets = new SecretsManagerClient({});
-
 const openaiEmbeddingModelId =
   process.env.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small";
 const openaiEmbeddingDimensions = 768;
@@ -79,29 +76,16 @@ async function fetchDocumentText(
 }
 
 async function getOpenAISecret() {
-  console.log("Fetching OpenAI secret from Secrets Manager");
-  const secret = JSON.parse(await getSecretString("openai-key"));
-  console.log("OpenAI secret fetched from Secrets Manager");
+  const secretId = process.env.OPENAI_SECRET_ID?.trim() || "openai-key";
+  const secret = JSON.parse(await getSecretString(secretId)) as {
+    openaiKey?: unknown;
+  };
 
-  return secret;
-}
-
-async function getSecretString(secretId: string) {
-  const response = await secrets.send(
-    new GetSecretValueCommand({
-      SecretId: secretId,
-    }),
-  );
-
-  if (typeof response.SecretString === "string" && response.SecretString) {
-    return response.SecretString;
+  if (typeof secret.openaiKey !== "string" || !secret.openaiKey) {
+    throw new Error("OpenAI secret is missing openaiKey.");
   }
 
-  if (response.SecretBinary) {
-    return new TextDecoder().decode(response.SecretBinary);
-  }
-
-  throw new Error(`Secret '${secretId}' is empty`);
+  return { openaiKey: secret.openaiKey };
 }
 
 
