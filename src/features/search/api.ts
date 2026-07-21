@@ -69,15 +69,21 @@ export function getDocsChatApiUrl() {
   return "/api/docs/chat";
 }
 
+function toAbsoluteDocsPath(url: string) {
+  return url.startsWith("/") ? url : `/${url}`;
+}
+
 export function toSortedResult(item: SearchResultRow): SortedResult {
+  const url = toAbsoluteDocsPath(item.url);
+
   return {
     id: item.id.toString(),
-    url: item.url,
+    url,
     type: item.type,
     content: item.content,
-    breadcrumbs: item.url
+    breadcrumbs: url
       .split("/")
-      .slice(1)
+      .slice(2)
       .map((part, index, parts) =>
         index === parts.length - 1 && part.includes("#")
           ? part.split("#")[0]
@@ -107,7 +113,10 @@ export function normalizeSearchResponse(
   }
 
   if (payload.every(isSortedResult)) {
-    return payload;
+    return payload.map((item) => ({
+      ...item,
+      url: toAbsoluteDocsPath(item.url),
+    }));
   }
 
   throw new Error("Unexpected search API response.");

@@ -6,6 +6,7 @@ import {
   createOptionsResponse,
   getRequestMethod,
 } from "../shared/http";
+import { normalizeRouteUrl } from "../shared/docs-utils";
 
 const ALLOWED_METHODS = "GET,OPTIONS";
 
@@ -52,7 +53,14 @@ export async function handler(event: {
       [query],
     );
 
-    return createJsonResponse(200, rows, ALLOWED_METHODS);
+    return createJsonResponse(
+      200,
+      rows.map((row) => ({
+        ...row,
+        url: normalizeRouteUrl(row.url),
+      })),
+      ALLOWED_METHODS,
+    );
   } catch (error) {
     console.error("Search Lambda failed", error);
     return createJsonResponse(
