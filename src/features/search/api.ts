@@ -2,7 +2,7 @@ import type { SortedResult } from "fumadocs-core/search";
 import { parseHighlights } from "./highlight-parser";
 
 export type SearchResultRow = {
-  id: number;
+  id: string | number;
   url: string;
   type: "page" | "heading" | "text";
   content: string;
@@ -23,7 +23,6 @@ export type ChatApiResponse = {
   sources?: string[];
   error?: string;
 };
-
 function isSearchResultRow(value: unknown): value is SearchResultRow {
   if (!value || typeof value !== "object") {
     return false;
@@ -32,11 +31,15 @@ function isSearchResultRow(value: unknown): value is SearchResultRow {
   const candidate = value as Record<string, unknown>;
 
   return (
-    typeof candidate.id === "number" &&
+    (typeof candidate.id === "string" ||
+      typeof candidate.id === "number") &&
     typeof candidate.url === "string" &&
-    typeof candidate.type === "string" &&
+    (candidate.type === "page" ||
+      candidate.type === "heading" ||
+      candidate.type === "text") &&
     typeof candidate.content === "string" &&
-    typeof candidate.contentWithHighlights === "string"
+    typeof candidate.contentWithHighlights === "string" &&
+    typeof candidate.rank === "number"
   );
 }
 
