@@ -33,6 +33,9 @@ ENV NEXT_PUBLIC_DOCS_API_BASE_URL=$NEXT_PUBLIC_DOCS_API_BASE_URL
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED=1
 
+RUN echo "Docker ARG: $NEXT_PUBLIC_DOCS_API_BASE_URL"
+RUN node -e "console.log('Node sees:', process.env.NEXT_PUBLIC_DOCS_API_BASE_URL)"
+
 RUN \
   if [ -f yarn.lock ]; then yarn run build; \
   elif [ -f package-lock.json ]; then npm run build; \
