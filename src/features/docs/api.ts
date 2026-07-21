@@ -12,20 +12,18 @@ export type DocsPageResponse = {
   url: string;
 };
 
-const DOCS_BASE_API_ENV = "NEXT_PUBLIC_DOCS_API_BASE_URL";
-
-function getRequiredApiUrl(envName: string) {
-  const apiUrl = process.env[envName]?.trim();
+function getBaseApiUrl() {
+  const apiUrl = process.env.NEXT_PUBLIC_DOCS_API_BASE_URL?.trim();
 
   if (!apiUrl) {
-    throw new Error(`${envName} is not configured.`);
+    throw new Error("NEXT_PUBLIC_DOCS_API_BASE_URL is not configured.");
   }
 
   return apiUrl;
 }
 
 function buildDocsPageApiUrl(slug: string) {
-   const baseUrl = getRequiredApiUrl(DOCS_BASE_API_ENV);
+   const baseUrl = getBaseApiUrl();
    const docsUrl = `${baseUrl}/docs/${slug}`;
 
   return docsUrl;
@@ -65,7 +63,7 @@ function isDocsPageResponse(payload: unknown): payload is DocsPageResponse {
 }
 
 export async function getPageTree(): Promise<PageTree.Root> {
-  const baseUrl = getRequiredApiUrl(DOCS_BASE_API_ENV);
+  const baseUrl = getBaseApiUrl();
   const pageTreeUrl = `${baseUrl}/docs/tree`;
   const response = await fetch(pageTreeUrl, {
     cache: "no-store",

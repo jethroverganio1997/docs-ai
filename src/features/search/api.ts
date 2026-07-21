@@ -24,17 +24,17 @@ export type ChatApiResponse = {
   error?: string;
 };
 
-const DOCS_BASE_API_ENV = "NEXT_PUBLIC_DOCS_API_BASE_URL";
 
-function getRequiredApiUrl(envName: string) {
-  const apiUrl = process.env[envName]?.trim();
+function getBaseApiUrl() {
+  const apiUrl = process.env.NEXT_PUBLIC_DOCS_API_BASE_URL?.trim();
 
   if (!apiUrl) {
-    throw new Error(`${envName} is not configured.`);
+    throw new Error("NEXT_PUBLIC_DOCS_API_BASE_URL is not configured.");
   }
 
   return apiUrl;
 }
+
 
 function isSearchResultRow(value: unknown): value is SearchResultRow {
   if (!value || typeof value !== "object") {
@@ -70,14 +70,14 @@ function isSortedResult(value: unknown): value is SortedResult {
 }
 
 export function getDocsSearchApiUrl() {
-  const baseUrl = getRequiredApiUrl(DOCS_BASE_API_ENV);
+  const baseUrl = getBaseApiUrl();
   const searchUrl = `${baseUrl}/docs/search`;
 
   return searchUrl;
 }
 
 export function getDocsChatApiUrl() {
-  const baseUrl = getRequiredApiUrl(DOCS_BASE_API_ENV);
+  const baseUrl = getBaseApiUrl();
   const chatUrl = `${baseUrl}/docs/chat`;
 
   return chatUrl;
