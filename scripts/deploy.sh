@@ -5,7 +5,8 @@ set -e
 AWS_REGION="ap-northeast-1"
 AWS_ACCOUNT_ID="118690287046"
 REPOSITORY_NAME="personal-docs-web"
-IMAGE_TAG="latest"
+
+IMAGE_TAG=$(cat image-tag.txt)
 
 ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 ECR_URI="${ECR_REGISTRY}/${REPOSITORY_NAME}:${IMAGE_TAG}"
