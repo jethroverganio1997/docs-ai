@@ -12,6 +12,11 @@ phases:
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c1-7)
   build:
     commands:
+      - echo "Current directory:"
+      - pwd
+      - ls -la
+      - echo "Dockerfile:"
+      - cat Dockerfile
       - echo Build started on `date`
       - echo Building the Docker image...
       - docker build -t $REPOSITORY_URI:latest .
