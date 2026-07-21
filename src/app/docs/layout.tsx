@@ -3,7 +3,10 @@
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { useQuery } from "@tanstack/react-query";
 import { getPageTree } from "@/features/docs/api";
-import { LAYOUT_TREE_TAG } from "@/features/docs/constants";
+import {
+  DOCS_TREE_QUERY_KEY,
+  DOCS_TREE_STALE_TIME_MS,
+} from "@/features/docs/constants";
 import { PageTree } from "fumadocs-core/server";
 import { baseOptions, linkItems, logo } from "@/config/navigation";
 import { AISearchTrigger } from "@/features/search/components/ai-search";
@@ -11,9 +14,9 @@ import { placeholderTree } from "@/features/docs/placeholder-tree";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { data: pageTree } = useQuery<PageTree.Root>({
-    queryKey: [LAYOUT_TREE_TAG],
+    queryKey: DOCS_TREE_QUERY_KEY,
     queryFn: getPageTree,
-    staleTime: 86_400_000,
+    staleTime: DOCS_TREE_STALE_TIME_MS,
   });
 
   const base = baseOptions();

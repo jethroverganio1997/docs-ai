@@ -4,7 +4,10 @@ import { useRouter } from "next/navigation";
 import { getPageTree } from "@/features/docs/api";
 import DocsEmpty from "@/app/docs/[...slug]/empty";
 import { useQuery } from "@tanstack/react-query";
-import { PAGE_TREE_TAG } from "@/features/docs/constants";
+import {
+  DOCS_TREE_QUERY_KEY,
+  DOCS_TREE_STALE_TIME_MS,
+} from "@/features/docs/constants";
 import type { PageTree } from "fumadocs-core/server";
 import { useEffect } from "react";
 import DocsLoadingPage from "./[...slug]/loading";
@@ -27,9 +30,9 @@ export default function DocsPage() {
     isLoading,
     isFetching,
   } = useQuery<PageTree.Root>({
-    queryKey: [PAGE_TREE_TAG],
+    queryKey: DOCS_TREE_QUERY_KEY,
     queryFn: getPageTree,
-    staleTime: 86_400_000,
+    staleTime: DOCS_TREE_STALE_TIME_MS,
   });
 
   useEffect(() => {
