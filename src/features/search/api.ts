@@ -48,7 +48,8 @@ function isSortedResult(value: unknown): value is SortedResult {
   const candidate = value as Record<string, unknown>;
 
   return (
-    typeof candidate.id === "string" &&
+    (typeof candidate.id === "string" ||
+      typeof candidate.id === "number")  &&
     typeof candidate.url === "string" &&
     typeof candidate.type === "string" &&
     typeof candidate.content === "string" &&
@@ -73,7 +74,7 @@ export function toSortedResult(item: SearchResultRow): SortedResult {
     content: item.content,
     breadcrumbs: item.url
       .split("/")
-      .slice(2)
+      .slice(1)
       .map((part, index, parts) =>
         index === parts.length - 1 && part.includes("#")
           ? part.split("#")[0]
